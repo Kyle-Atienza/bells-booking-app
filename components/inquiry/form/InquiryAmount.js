@@ -1,23 +1,26 @@
 import { View } from "react-native";
 import { Text, TextInput } from "react-native-paper";
 import { SIZES } from "../../../constants";
+import { checkInputLimit } from "../../../helpers/typeHelper";
 import { globalStyles } from "../../../styles";
 import { DataCard } from "../../cards";
+import { DatePicker } from "./DatePicker";
 
 export const InquiryAmount = ({
   formData,
   setFormData,
   amountData,
   newInquiry,
+  inquiryType,
 }) => {
   return (
     <>
-      <View
-        style={globalStyles.container}
-        pointerEvents={newInquiry ? "auto" : "none"}
-      >
+      <View style={globalStyles.container}>
         <DataCard label="Sub Total" value={amountData.subTotal} />
-        <View style={{ marginTop: SIZES.large }}>
+        <View
+          style={{ marginTop: SIZES.large }}
+          pointerEvents={newInquiry ? "auto" : "none"}
+        >
           <Text variant="titleSmall">Discount (in PHP)</Text>
           <TextInput
             keyboardType="number-pad"
@@ -26,7 +29,7 @@ export const InquiryAmount = ({
             onChangeText={(text) =>
               setFormData((prevState) => ({
                 ...prevState,
-                discount: text,
+                discount: checkInputLimit(text, amountData.subTotal).toString(),
               }))
             }
             style={{ backgroundColor: "#fff" }}
@@ -35,11 +38,25 @@ export const InquiryAmount = ({
           />
         </View>
       </View>
-      <View
-        style={globalStyles.container}
-        pointerEvents={newInquiry ? "auto" : "none"}
-      >
+      <View style={globalStyles.container}>
         <DataCard label="Total Amount Due" value={amountData.totalAmountDue} />
+        {!formData.downpayment ? (
+          <View
+            style={{ marginTop: SIZES.large }}
+            pointerEvents={newInquiry ? "auto" : "none"}
+          >
+            <Text variant="titleSmall">Downpayment Due</Text>
+            <DatePicker
+              date={formData.downpaymentDue}
+              setDate={(date) =>
+                setFormData((prevState) => ({
+                  ...prevState,
+                  downpaymentDue: date,
+                }))
+              }
+            />
+          </View>
+        ) : null}
         <View style={{ marginTop: SIZES.large }}>
           <Text variant="titleSmall">Downpayment</Text>
           <TextInput
@@ -49,7 +66,10 @@ export const InquiryAmount = ({
             onChangeText={(text) =>
               setFormData((prevState) => ({
                 ...prevState,
-                downpayment: text,
+                downpayment: checkInputLimit(
+                  text,
+                  amountData.totalAmountDue
+                ).toString(),
               }))
             }
             style={{ backgroundColor: "#fff" }}
@@ -60,7 +80,10 @@ export const InquiryAmount = ({
       </View>
       <View style={globalStyles.container}>
         <DataCard label="Balance" value={amountData.balance} />
-        {!newInquiry ? (
+        {!newInquiry &&
+        inquiryType === "apartment" &&
+        formData.downpayment &&
+        parseFloat(amountData.balance) !== 0 ? (
           <View style={{ marginTop: SIZES.large }}>
             <Text variant="titleSmall">Payment</Text>
             <TextInput
@@ -70,7 +93,7 @@ export const InquiryAmount = ({
               onChangeText={(text) =>
                 setFormData((prevState) => ({
                   ...prevState,
-                  payment: text,
+                  payment: checkInputLimit(text, amountData.balance).toString(),
                 }))
               }
               style={{ backgroundColor: "#fff" }}

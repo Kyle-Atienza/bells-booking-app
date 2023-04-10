@@ -38,9 +38,20 @@ const Dashboard = () => {
           },
           headerRight: () => {
             return (
-              <TouchableOpacity onPress={() => router.push("login")}>
-                <Ionicons name="log-out-outline" size={24} />
-              </TouchableOpacity>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: SIZES.small,
+                }}
+              >
+                <TouchableOpacity onPress={() => router.push("calendar")}>
+                  <Ionicons name="calendar" size={24} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => router.push("login")}>
+                  <Ionicons name="log-out-outline" size={24} />
+                </TouchableOpacity>
+              </View>
             );
           },
         }}

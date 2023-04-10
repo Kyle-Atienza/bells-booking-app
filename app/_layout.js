@@ -11,6 +11,8 @@ const theme = {
     primary: "#0097B2",
     secondary: "#0FB60B",
     primaryContainer: "#E9F7FF",
+    secondaryContainer: "#e8f7e8",
+    tertiaryContainer: "#efd8ed",
   },
 };
 

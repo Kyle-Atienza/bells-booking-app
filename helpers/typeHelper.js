@@ -3,5 +3,6 @@ export const capitalize = (string) => {
 };
 
 export const checkInputLimit = (value, limit) => {
-  return value > limit ? limit : value;
+  console.log(value, limit, value > limit);
+  return parseFloat(value) > parseFloat(limit) ? limit : value;
 };

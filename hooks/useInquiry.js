@@ -1,24 +1,18 @@
 import { useRouter } from "expo-router";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { UtilitiesContext } from "../contexts";
 import { parseRangeTime } from "../helpers/timeHelper";
 import { createInquiry, getInquiries, payInquiry } from "../services";
 
-export const useInquiry = (
-  inquiryId,
-  inquiryType,
-  setInquiryType,
-  formData,
-  setFormData,
-  amountData,
-  setAmountData,
-  setIsLoading
-) => {
+export const useInquiry = () => {
   const route = useRouter();
 
   const { setRefresh } = useContext(UtilitiesContext);
 
-  const validateForm = () => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const validateForm = (inquiryType, { formData, amountData }) => {
+    // console.log({ formData, amountData });
     if (
       inquiryType === "event" &&
       (!formData.name ||
@@ -43,9 +37,8 @@ export const useInquiry = (
     return true;
   };
 
-  const submit = () => {
-    setIsLoading(true);
-    createInquiry({
+  const mapDataToDb = (inquiryType, { formData, amountData }) => {
+    return {
       type: inquiryType,
       name: formData.name,
       event_date:
@@ -69,74 +62,40 @@ export const useInquiry = (
       discount: formData.discount || 0,
       downpayment: formData.downpayment || 0,
       balance: amountData.balance,
-    })
-      .then((res) => {
-        setIsLoading(false);
-        setRefresh(true);
-        route.push("/");
-      })
-      .catch((e) => {
-        setIsLoading(false);
-        console.log(e);
-      });
+    };
   };
 
-  const pay = (type) => {
-    setIsLoading(true);
-    payInquiry({
-      id: inquiryId,
-      data: {
-        type: type,
-        amount: formData.payment,
+  const mapDataFromDb = (data, inquiryId) => {
+    const currentData = data.find((item) => item.id === parseInt(inquiryId));
+    console.log(currentData);
+
+    return {
+      inquiryType: currentData.type,
+      formData: {
+        name: currentData.name,
+        range: {
+          startDate: new Date(currentData.apt_date_from),
+          endDate: new Date(currentData.apt_date_to),
+        },
+        date: new Date(currentData.event_date),
+        schedule: `${currentData.event_time_from} to ${currentData.event_time_to}`,
+        estPax: null,
+        discount: parseFloat(currentData.discount)
+          ? parseFloat(currentData.discount).toString()
+          : null,
+        downpayment: parseFloat(currentData.downpayment)
+          ? parseFloat(currentData.downpayment).toString()
+          : null,
+        apartmentCount: currentData.apt_addon || currentData.apt_qty,
       },
-    })
-      .then((res) => {
-        console.log(res);
-        setIsLoading(false);
-        setRefresh(true);
-      })
-      .catch((e) => {
-        console.log(e);
-        setIsLoading(false);
-      });
+      balance: currentData.balance,
+    };
   };
 
-  const get = () => {
-    getInquiries()
-      .then((res) => {
-        let innerData = res.data.data.rows;
-        const currentData = innerData.find(
-          (item) => item.id === parseInt(inquiryId)
-        );
-        setInquiryType(currentData.type);
-
-        setFormData({
-          name: currentData.name,
-          range: {
-            startDate: new Date(currentData.apt_date_from),
-            endDate: new Date(currentData.apt_date_to),
-          },
-          date: new Date(currentData.event_date),
-          schedule: `${currentData.event_time_from} to ${currentData.event_time_to}`,
-          estPax: null,
-          discount: parseFloat(currentData.discount)
-            ? parseFloat(currentData.discount).toString()
-            : null,
-          downpayment: parseFloat(currentData.downpayment)
-            ? parseFloat(currentData.downpayment).toString()
-            : null,
-          apartmentCount: currentData.apt_addon || currentData.apt_qty,
-        });
-
-        setAmountData((prevState) => ({
-          ...prevState,
-          balance: currentData.balance,
-        }));
-      })
-      .catch((e) => {
-        console.log(e);
-      });
+  return {
+    validateForm,
+    mapDataFromDb,
+    mapDataToDb,
+    isLoading,
   };
-
-  return { validateForm, submitInquiry: submit, payInquiry: pay };
 };

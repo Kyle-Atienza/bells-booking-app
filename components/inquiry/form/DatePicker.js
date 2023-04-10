@@ -5,7 +5,7 @@ import { IconButton, TextInput, useTheme } from "react-native-paper";
 import { DatePickerModal } from "react-native-paper-dates";
 import { SIZES } from "../../../constants";
 
-export const DatePicker = ({ date, setDate }) => {
+export const DatePicker = ({ date, setDate, ...rest }) => {
   const theme = useTheme();
 
   const [open, setOpen] = React.useState(false);
@@ -43,6 +43,7 @@ export const DatePicker = ({ date, setDate }) => {
             style={{ backgroundColor: "#fff", flex: 1 }}
             mode="outlined"
             dense
+            {...rest}
           />
         </View>
         <TouchableOpacity
