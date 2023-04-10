@@ -5,6 +5,17 @@
       "bundler": "metro"
     },
     "name": "bells-booking-app",
-    "slug": "bells-booking-app"
+    "slug": "bells-booking-app",
+    "splash": {
+      "image": "./assets/images/splash-image.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "e77bc547-57fc-466e-bdfd-8b537b68e41b"
+      }
+    },
+    "android": {
+      "package": "com.bellsbookingapp.app"
+    }
   }
 }
