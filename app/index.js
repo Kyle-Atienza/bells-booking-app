@@ -10,11 +10,14 @@ import { globalStyles } from "../styles";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 import { SIZES } from "../constants";
-import { getInquiries } from "../services";
+import { useAuth } from "../hooks";
+import { logout } from "../services/auth";
 
 const Dashboard = () => {
   const theme = useTheme();
   const router = useRouter();
+
+  const { onLogout } = useAuth();
 
   const [inquiryModal, setInquiryModal] = React.useState({
     visible: false,
@@ -45,10 +48,12 @@ const Dashboard = () => {
                   gap: SIZES.small,
                 }}
               >
-                <TouchableOpacity onPress={() => router.push("calendar")}>
+                <TouchableOpacity
+                  onPress={() => router.push("schedules-calendar")}
+                >
                   <Ionicons name="calendar" size={24} />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => router.push("login")}>
+                <TouchableOpacity onPress={onLogout}>
                   <Ionicons name="log-out-outline" size={24} />
                 </TouchableOpacity>
               </View>

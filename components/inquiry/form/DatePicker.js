@@ -22,10 +22,6 @@ export const DatePicker = ({ date, setDate, ...rest }) => {
     [setOpen, setDate]
   );
 
-  /* useEffect(() => {
-    console.log(date);
-  }, [date]); */
-
   return (
     <>
       <View style={{ flexDirection: "row", gap: SIZES.large }}>

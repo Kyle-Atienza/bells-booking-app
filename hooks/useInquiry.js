@@ -1,18 +1,7 @@
-import { useRouter } from "expo-router";
-import { useContext, useState } from "react";
-import { UtilitiesContext } from "../contexts";
 import { parseRangeTime } from "../helpers/timeHelper";
-import { createInquiry, getInquiries, payInquiry } from "../services";
 
 export const useInquiry = () => {
-  const route = useRouter();
-
-  const { setRefresh } = useContext(UtilitiesContext);
-
-  const [isLoading, setIsLoading] = useState(false);
-
   const validateForm = (inquiryType, { formData, amountData }) => {
-    // console.log({ formData, amountData });
     if (
       inquiryType === "event" &&
       (!formData.name ||
@@ -41,6 +30,7 @@ export const useInquiry = () => {
     return {
       type: inquiryType,
       name: formData.name,
+      estimated_pax: formData.estPax,
       event_date:
         inquiryType === "event" ? new Date(formData.date).toISOString() : null,
       event_time_from:
@@ -61,13 +51,14 @@ export const useInquiry = () => {
         inquiryType === "event" ? parseInt(formData.apartmentCount) : null,
       discount: formData.discount || 0,
       downpayment: formData.downpayment || 0,
+      downpayment_due: new Date(formData.downpaymentDue).toISOString(),
       balance: amountData.balance,
     };
   };
 
   const mapDataFromDb = (data, inquiryId) => {
     const currentData = data.find((item) => item.id === parseInt(inquiryId));
-    console.log(currentData);
+    console.log(currentData.downpayment_due);
 
     return {
       inquiryType: currentData.type,
@@ -79,10 +70,14 @@ export const useInquiry = () => {
         },
         date: new Date(currentData.event_date),
         schedule: `${currentData.event_time_from} to ${currentData.event_time_to}`,
-        estPax: null,
+        estPax: currentData.estimated_pax.toString(),
         discount: parseFloat(currentData.discount)
           ? parseFloat(currentData.discount).toString()
           : null,
+        downpaymentDue:
+          new Date(currentData.downpayment_due) !== new Date(0)
+            ? new Date(currentData.downpayment_due)
+            : null,
         downpayment: parseFloat(currentData.downpayment)
           ? parseFloat(currentData.downpayment).toString()
           : null,
@@ -96,6 +91,5 @@ export const useInquiry = () => {
     validateForm,
     mapDataFromDb,
     mapDataToDb,
-    isLoading,
   };
 };

@@ -12,15 +12,20 @@ export const InquiryAmount = ({
   amountData,
   newInquiry,
   inquiryType,
+  hasDownpayment,
 }) => {
+  const isPayable =
+    !newInquiry &&
+    inquiryType === "apartment" &&
+    parseFloat(formData.downpayment) &&
+    parseFloat(amountData.balance) !== 0 &&
+    hasDownpayment;
+
   return (
     <>
       <View style={globalStyles.container}>
         <DataCard label="Sub Total" value={amountData.subTotal} />
-        <View
-          style={{ marginTop: SIZES.large }}
-          pointerEvents={newInquiry ? "auto" : "none"}
-        >
+        <View style={{ marginTop: SIZES.large }}>
           <Text variant="titleSmall">Discount (in PHP)</Text>
           <TextInput
             keyboardType="number-pad"
@@ -40,24 +45,27 @@ export const InquiryAmount = ({
       </View>
       <View style={globalStyles.container}>
         <DataCard label="Total Amount Due" value={amountData.totalAmountDue} />
-        {!formData.downpayment ? (
-          <View
-            style={{ marginTop: SIZES.large }}
-            pointerEvents={newInquiry ? "auto" : "none"}
-          >
-            <Text variant="titleSmall">Downpayment Due</Text>
-            <DatePicker
-              date={formData.downpaymentDue}
-              setDate={(date) =>
-                setFormData((prevState) => ({
-                  ...prevState,
-                  downpaymentDue: date,
-                }))
-              }
-            />
-          </View>
-        ) : null}
-        <View style={{ marginTop: SIZES.large }}>
+        <View
+          style={{
+            marginTop: SIZES.large,
+          }}
+        >
+          <Text variant="titleSmall">Downpayment Due</Text>
+          <DatePicker
+            date={formData.downpaymentDue}
+            setDate={(date) =>
+              setFormData((prevState) => ({
+                ...prevState,
+                downpaymentDue: date,
+              }))
+            }
+          />
+        </View>
+        <View
+          style={{
+            marginTop: SIZES.large,
+          }}
+        >
           <Text variant="titleSmall">Downpayment</Text>
           <TextInput
             keyboardType="number-pad"
@@ -80,10 +88,7 @@ export const InquiryAmount = ({
       </View>
       <View style={globalStyles.container}>
         <DataCard label="Balance" value={amountData.balance} />
-        {!newInquiry &&
-        inquiryType === "apartment" &&
-        formData.downpayment &&
-        parseFloat(amountData.balance) !== 0 ? (
+        {isPayable ? (
           <View style={{ marginTop: SIZES.large }}>
             <Text variant="titleSmall">Payment</Text>
             <TextInput
