@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View } from "react-native";
 import { Text, useTheme, Button } from "react-native-paper";
-import PropTypes from "prop-types";
 
 export const DataCard = ({ variant = "primary", value, label }) => {
   const theme = useTheme();
@@ -46,8 +45,4 @@ export const DataCard = ({ variant = "primary", value, label }) => {
       <Text variant="labelLarge">{label || "Label"}</Text>
     </View>
   );
-};
-
-DataCard.propTypes = {
-  variant: "primary",
 };

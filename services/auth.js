@@ -1,17 +1,13 @@
 import axios from "axios";
-import { config, params } from "../helpers/axiosHelper";
 import { REACT_APP_BASE_URL } from "@env";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const API_URL = `${REACT_APP_BASE_URL}/auth`;
 
 export const login = async (credentials) => {
-  const response = axios.post(`${API_URL}/signin`, credentials);
-
-  return response;
+  return await axios.post(`${API_URL}/signin`, credentials);
 };
 
 export const logout = async () => {
-  const response = axios.post(`${API_URL}/logout`);
-
-  return response;
+  return await axios.post(`${API_URL}/logout`);
 };

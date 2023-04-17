@@ -53,10 +53,11 @@ const Login = () => {
           headerTitle: () => {
             return "";
           },
+          headerShown: false,
         }}
       />
       <View style={globalStyles.main}>
-        <View style={globalStyles.container}>
+        <View style={{ ...globalStyles.container, marginTop: 80 }}>
           <View style={{ marginTop: SIZES.large, alignItems: "center" }}>
             <Image style={{ width: 110, height: 110 }} source={Logo} />
           </View>
@@ -97,19 +98,6 @@ const Login = () => {
             <Button style={globalStyles.button.primary(theme.colors.primary)}>
               <Text variant="labelLarge" style={{ color: "#fff" }}>
                 Login
-              </Text>
-            </Button>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{ marginTop: 40 }}
-            onPress={() => {
-              router.push("/");
-              setRefresh(true);
-            }}
-          >
-            <Button style={globalStyles.button.primary(theme.colors.primary)}>
-              <Text variant="labelLarge" style={{ color: "#fff" }}>
-                Go Home
               </Text>
             </Button>
           </TouchableOpacity>

@@ -39,26 +39,6 @@ const Dashboard = () => {
               </Text>
             );
           },
-          headerRight: () => {
-            return (
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: SIZES.small,
-                }}
-              >
-                <TouchableOpacity
-                  onPress={() => router.push("schedules-calendar")}
-                >
-                  <Ionicons name="calendar" size={24} />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={onLogout}>
-                  <Ionicons name="log-out-outline" size={24} />
-                </TouchableOpacity>
-              </View>
-            );
-          },
         }}
       />
       <InquiryTypeModal
@@ -102,17 +82,6 @@ const Dashboard = () => {
                   }}
                 >
                   <Text variant="titleMedium">Inquiries</Text>
-                  <TouchableOpacity
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      gap: 4,
-                    }}
-                    onPress={() => router.push("schedule")}
-                  >
-                    <Ionicons name="layers-outline" size={16} />
-                    <Text variant="titleMedium">View All</Text>
-                  </TouchableOpacity>
                 </View>
               </View>
             </>

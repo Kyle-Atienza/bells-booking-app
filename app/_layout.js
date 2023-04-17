@@ -1,9 +1,14 @@
 import { Stack, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { View } from "react-native";
-import { MD3LightTheme, Provider as PaperProvider } from "react-native-paper";
+import { Drawer } from "expo-router/drawer";
+import {
+  MD3LightTheme,
+  Provider as PaperProvider,
+  Text,
+} from "react-native-paper";
 import { UtilitiesContext } from "../contexts";
-import { AsyncStorage } from "react-native";
+
+import { DrawerContent } from "../components/drawer";
 
 const theme = {
   ...MD3LightTheme,
@@ -25,10 +30,15 @@ const Layout = () => {
   return (
     <UtilitiesContext.Provider value={{ refresh, setRefresh }}>
       <PaperProvider theme={theme}>
-        <Stack />
+        <Drawer
+          drawerContent={() => {
+            return <DrawerContent />;
+          }}
+        />
       </PaperProvider>
     </UtilitiesContext.Provider>
   );
+  s;
 };
 
 export default Layout;
