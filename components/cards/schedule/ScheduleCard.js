@@ -17,9 +17,9 @@ export const ScheduleCard = ({ data }) => {
   }, [data]);
 
   const cardStatus = () => {
-    if (parseFloat(data.downpayment) === 0) return "Pending | ";
-    if (isPaid) return "Paid | ";
-    return "Reserved | ";
+    if (parseFloat(data.downpayment) === 0) return "Inquiry | ";
+    if (isPaid) return "Confirmed | ";
+    return "With Downpayment | ";
   };
 
   const cardChips = () => {

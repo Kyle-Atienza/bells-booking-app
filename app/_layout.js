@@ -37,6 +37,8 @@ const Layout = () => {
       .then((res) => {
         const fetchedConfigs = res.data.data;
 
+        console.log(fetchedConfigs);
+
         setConfigurations(
           fetchedConfigs.reduce((mappedConfigs, config) => {
             mappedConfigs[config.key] = config.value;
@@ -58,14 +60,18 @@ const Layout = () => {
   }, [loggedIn]);
 
   useEffect(() => {
-    if (loggedIn) {
-      router.push("/");
-      initializeConfigurations();
-    }
+    initializeConfigurations();
   }, []);
 
+  useEffect(() => {
+    initializeConfigurations();
+    setRefresh(false);
+  }, [refresh]);
+
   return (
-    <UtilitiesContext.Provider value={{ refresh, setRefresh, configurations }}>
+    <UtilitiesContext.Provider
+      value={{ refresh, setRefresh, configurations, setConfigurations }}
+    >
       <PaperProvider theme={theme}>
         <Drawer
           drawerContent={() => {

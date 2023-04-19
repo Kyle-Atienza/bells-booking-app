@@ -56,28 +56,11 @@ const Settings = () => {
               value: formData[name],
             })
               .then((res) => {
-                const fetchedConfigs = res.data.data;
-
-                setConfigurations(
-                  fetchedConfigs.reduce((mappedConfigs, config) => {
-                    mappedConfigs[config.key] = config.value;
-
-                    return mappedConfigs;
-                  }, {})
-                );
-
-                console.log(
-                  "configs",
-                  fetchedConfigs.reduce((mappedConfigs, config) => {
-                    mappedConfigs[config.key] = config.value;
-
-                    return mappedConfigs;
-                  }, {})
-                );
+                setRefresh(true);
                 setIsLoading(false);
               })
               .catch((e) => {
-                console.log("error", e);
+                console.log(e);
 
                 setIsLoading(false);
               });

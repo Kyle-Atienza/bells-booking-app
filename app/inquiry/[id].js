@@ -22,7 +22,14 @@ import { createInquiry, getInquiries, payInquiry } from "../../services";
 import { useInquiry } from "../../hooks";
 import { UtilitiesContext } from "../../contexts";
 import { capitalize } from "../../helpers/typeHelper";
+import {
+  validateForm,
+  mapDataFromDb,
+  mapDataToDb,
+  compute,
+} from "../../helpers/inqiuryHelper";
 import { LoadingScreen } from "../../components/common";
+import { DateTime } from "luxon";
 
 const Inquire = () => {
   const theme = useTheme();
@@ -32,11 +39,13 @@ const Inquire = () => {
 
   const { refresh, setRefresh, configurations } = useContext(UtilitiesContext);
 
+  const { resetData } = useInquiry();
+
   const [inquiryType, setInquiryType] = useState(undefined);
   const [newInquiry, setNewInquiry] = useState(undefined);
   const [hasDownpayment, setHasDownpayment] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = React.useState({
+  const [formData, setFormData] = useState({
     name: null,
     range: { startDate: null, endDate: null },
     date: null,
@@ -53,30 +62,27 @@ const Inquire = () => {
     totalAmountDue: null,
     balance: null,
   });
+  const [priceData, setPriceData] = useState({});
 
-  const {
-    validateForm,
-    mapDataFromDb,
-    mapDataToDb,
-    isLoading: isInquiryLoading,
-  } = useInquiry();
+  // const { validateForm, mapDataFromDb, mapDataToDb } = useInquiry();
 
   const onSubmit = () => {
+    console.log(formData);
     if (!validateForm(inquiryType, { formData, amountData })) {
       alert("Fill up all required forms");
       return;
     }
 
     setIsLoading(true);
-    createInquiry(mapDataToDb(inquiryType, { formData, amountData }))
+    createInquiry(mapDataToDb(inquiryType, { formData, amountData, priceData }))
       .then((res) => {
         setIsLoading(false);
         setRefresh(true);
         route.push("/");
       })
       .catch((e) => {
-        setIsLoading(false);
         console.log(e);
+        setIsLoading(false);
       });
   };
 
@@ -88,48 +94,38 @@ const Inquire = () => {
         amount: amount,
       },
     });
-    if (
-      formData.payment ||
-      (inquiryType === "event" && !formData.payment) ||
-      (!hasDownpayment && formData.downpayment)
-    ) {
-      setIsLoading(true);
-      payInquiry({
-        id: inquiryId,
-        data: {
-          type: type,
-          amount: parseFloat(amount),
-        },
+    setIsLoading(true);
+    payInquiry({
+      id: inquiryId,
+      data: {
+        type: type,
+        amount: parseFloat(amount),
+      },
+    })
+      .then((res) => {
+        setIsLoading(false);
+        setRefresh(true);
       })
-        .then((res) => {
-          setIsLoading(false);
-          setRefresh(true);
-        })
-        .catch((e) => {
-          setIsLoading(false);
-        });
-    } else {
-      alert("Please add amount of payment");
-    }
+      .catch((e) => {
+        console.log(e);
+        setIsLoading(false);
+      });
   };
 
   useEffect(() => {
-    setAmountData({
-      subTotal: formData.apartmentCount * configurations.APARTMENT_PRICE,
-      totalAmountDue:
-        formData.apartmentCount * configurations.APARTMENT_PRICE -
-        formData.discount,
-      balance:
-        formData.apartmentCount * configurations.APARTMENT_PRICE -
-        formData.discount -
-        formData.downpayment,
-    });
-  }, [formData.apartmentCount, formData.discount, formData.downpayment]);
+    setAmountData(
+      compute(newInquiry, inquiryType, priceData, formData, amountData)
+    );
+    console.log(configurations);
+  }, [formData, refresh, priceData]);
 
   useEffect(() => {
     if (inquiryId === "apartment" || inquiryId === "event") {
+      resetData(setFormData, setAmountData, setPriceData);
+
       setInquiryType(inquiryId);
       setNewInquiry(true);
+      setPriceData(configurations);
     } else {
       setNewInquiry(false);
 
@@ -143,6 +139,7 @@ const Inquire = () => {
             ...prevState,
             balance: mappedResponse.balance,
           }));
+          setPriceData(mappedResponse.prices);
           setHasDownpayment(!!mappedResponse.formData.downpayment);
         })
         .catch((e) => {
@@ -156,12 +153,6 @@ const Inquire = () => {
       setInquiryType(undefined);
     };
   }, [refresh]);
-
-  useEffect(() => {
-    setIsLoading(isInquiryLoading);
-  }, [isInquiryLoading]);
-
-  console.log(configurations);
 
   return (
     <SafeAreaView>
@@ -207,51 +198,8 @@ const Inquire = () => {
             newInquiry={newInquiry}
             onPayment={(type, amount) => onPayment(type, amount)}
             onSubmit={onSubmit}
+            inquiryType={inquiryType}
           />
-          {/* {parseFloat(amountData.balance) !== 0 ? (
-            <View style={globalStyles.container}>
-              {newInquiry ? (
-                parseFloat(formData.downpayment) || formData.downpaymentDue ? (
-                  <TouchableOpacity onPress={() => onSubmit()}>
-                    <Button
-                      style={globalStyles.button.primary(
-                        theme.colors.secondary
-                      )}
-                    >
-                      <Text variant="labelLarge" style={{ color: "#fff" }}>
-                        Add Inquiry
-                      </Text>
-                    </Button>
-                  </TouchableOpacity>
-                ) : null
-              ) : formData.downpayment || formData.payment ? (
-                <TouchableOpacity
-                  onPress={() =>
-                    onPayment(
-                      !hasDownpayment ? "downpayment" : "payment",
-                      hasDownpayment
-                        ? inquiryType === "apartment"
-                          ? formData.payment
-                          : amountData.balance
-                        : formData.downpayment
-                    )
-                  }
-                >
-                  <Button
-                    style={globalStyles.button.primary(theme.colors.primary)}
-                  >
-                    <Text variant="labelLarge" style={{ color: "#fff" }}>
-                      {hasDownpayment
-                        ? inquiryType === "apartment"
-                          ? "Pay Apartment"
-                          : "Mark as fully paid"
-                        : "Pay Downpayment"}
-                    </Text>
-                  </Button>
-                </TouchableOpacity>
-              ) : null}
-            </View>
-          ) : null} */}
         </View>
       </ScrollView>
     </SafeAreaView>

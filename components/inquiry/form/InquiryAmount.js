@@ -1,7 +1,7 @@
 import { View } from "react-native";
 import { Text, TextInput } from "react-native-paper";
 import { SIZES } from "../../../constants";
-import { checkInputLimit } from "../../../helpers/typeHelper";
+import { checkInputFloor, checkInputLimit } from "../../../helpers/typeHelper";
 import { globalStyles } from "../../../styles";
 import { DataCard } from "../../cards";
 import { DatePicker } from "./DatePicker";
@@ -94,7 +94,14 @@ export const InquiryAmount = ({
             <TextInput
               keyboardType="number-pad"
               placeholder="0.00"
-              value={formData.payment || ""}
+              value={
+                formData.payment
+                  ? checkInputLimit(
+                      formData.payment,
+                      formData.balance
+                    ).toString()
+                  : ""
+              }
               onChangeText={(text) =>
                 setFormData((prevState) => ({
                   ...prevState,

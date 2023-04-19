@@ -198,7 +198,7 @@ export const Inquiries = ({ header, filteredByDate, limit }) => {
           renderItem={({ item }) => {
             return renderItem(item);
           }}
-          keyExtractor={(item) => (item ? item.id : "temp")}
+          keyExtractor={(item) => item.id || "temp"}
           contentContainerStyle={{
             rowGap: SIZES.large,
             paddingBottom: 50,
