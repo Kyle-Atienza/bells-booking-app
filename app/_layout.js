@@ -9,6 +9,8 @@ import {
 import { UtilitiesContext } from "../contexts";
 
 import { DrawerContent } from "../components/drawer";
+import { useAuth } from "../hooks";
+import { getConfigurations } from "../services/configuration";
 
 const theme = {
   ...MD3LightTheme,
@@ -25,10 +27,45 @@ const theme = {
 const Layout = () => {
   const router = useRouter();
 
+  const { loggedIn } = useAuth();
+
   const [refresh, setRefresh] = useState(false);
+  const [configurations, setConfigurations] = useState({});
+
+  const initializeConfigurations = () => {
+    getConfigurations()
+      .then((res) => {
+        const fetchedConfigs = res.data.data;
+
+        setConfigurations(
+          fetchedConfigs.reduce((mappedConfigs, config) => {
+            mappedConfigs[config.key] = config.value;
+
+            return mappedConfigs;
+          }, {})
+        );
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  };
+
+  useEffect(() => {
+    if (loggedIn) {
+      router.push("/");
+      initializeConfigurations();
+    }
+  }, [loggedIn]);
+
+  useEffect(() => {
+    if (loggedIn) {
+      router.push("/");
+      initializeConfigurations();
+    }
+  }, []);
 
   return (
-    <UtilitiesContext.Provider value={{ refresh, setRefresh }}>
+    <UtilitiesContext.Provider value={{ refresh, setRefresh, configurations }}>
       <PaperProvider theme={theme}>
         <Drawer
           drawerContent={() => {

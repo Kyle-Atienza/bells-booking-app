@@ -16,16 +16,18 @@ export const useAuth = () => {
     AsyncStorage.getItem("@accessToken")
       .then((res) => {
         if (!res) {
-          router.push("/login");
+          router.push("login");
+        } else {
+          // router.push("/");
+          setAccessToken(res);
+          setLoggedIn(true);
         }
-        setAccessToken(res);
-        setLoggedIn(true);
         setRefresh(false);
       })
       .catch((e) => {
         console.log(e);
         setLoggedIn(false);
-        router.push("/login");
+        // router.push("login");
         setRefresh(false);
       });
   }, [refresh]);
@@ -33,7 +35,6 @@ export const useAuth = () => {
   const onLogout = () => {
     logout()
       .then((res) => {
-        console.log(res);
         AsyncStorage.removeItem("@accessToken")
           .then((res) => {
             router.push("login");

@@ -52,6 +52,7 @@ const Dashboard = () => {
       />
       <View style={globalStyles.main}>
         <Inquiries
+          limit={5}
           header={
             <>
               <View>

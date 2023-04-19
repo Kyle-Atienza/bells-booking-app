@@ -11,7 +11,11 @@ import { useTheme, Text, Button } from "react-native-paper";
 import { globalStyles } from "../../styles";
 import { APARTMENT_PRICE, SIZES } from "../../constants";
 
-import { InquiryInformation, InquiryAmount } from "../../components/inquiry";
+import {
+  InquiryInformation,
+  InquiryAmount,
+  InquiryButton,
+} from "../../components/inquiry";
 
 import { createInquiry, getInquiries, payInquiry } from "../../services";
 
@@ -26,7 +30,7 @@ const Inquire = () => {
 
   const { id: inquiryId } = useSearchParams();
 
-  const { refresh, setRefresh } = useContext(UtilitiesContext);
+  const { refresh, setRefresh, configurations } = useContext(UtilitiesContext);
 
   const [inquiryType, setInquiryType] = useState(undefined);
   const [newInquiry, setNewInquiry] = useState(undefined);
@@ -102,7 +106,6 @@ const Inquire = () => {
           setRefresh(true);
         })
         .catch((e) => {
-          console.log("payment", e);
           setIsLoading(false);
         });
     } else {
@@ -112,11 +115,12 @@ const Inquire = () => {
 
   useEffect(() => {
     setAmountData({
-      subTotal: formData.apartmentCount * APARTMENT_PRICE,
+      subTotal: formData.apartmentCount * configurations.APARTMENT_PRICE,
       totalAmountDue:
-        formData.apartmentCount * APARTMENT_PRICE - formData.discount,
+        formData.apartmentCount * configurations.APARTMENT_PRICE -
+        formData.discount,
       balance:
-        formData.apartmentCount * APARTMENT_PRICE -
+        formData.apartmentCount * configurations.APARTMENT_PRICE -
         formData.discount -
         formData.downpayment,
     });
@@ -135,7 +139,6 @@ const Inquire = () => {
 
           setInquiryType(mappedResponse.inquiryType);
           setFormData(mappedResponse.formData);
-          console.log(inquiryId);
           setAmountData((prevState) => ({
             ...prevState,
             balance: mappedResponse.balance,
@@ -157,6 +160,8 @@ const Inquire = () => {
   useEffect(() => {
     setIsLoading(isInquiryLoading);
   }, [isInquiryLoading]);
+
+  console.log(configurations);
 
   return (
     <SafeAreaView>
@@ -195,7 +200,15 @@ const Inquire = () => {
             inquiryType={inquiryType}
             hasDownpayment={hasDownpayment}
           />
-          {parseFloat(amountData.balance) !== 0 ? (
+          <InquiryButton
+            formData={formData}
+            amountData={amountData}
+            hasDownpayment={hasDownpayment}
+            newInquiry={newInquiry}
+            onPayment={(type, amount) => onPayment(type, amount)}
+            onSubmit={onSubmit}
+          />
+          {/* {parseFloat(amountData.balance) !== 0 ? (
             <View style={globalStyles.container}>
               {newInquiry ? (
                 parseFloat(formData.downpayment) || formData.downpaymentDue ? (
@@ -211,7 +224,7 @@ const Inquire = () => {
                     </Button>
                   </TouchableOpacity>
                 ) : null
-              ) : (
+              ) : formData.downpayment || formData.payment ? (
                 <TouchableOpacity
                   onPress={() =>
                     onPayment(
@@ -236,9 +249,9 @@ const Inquire = () => {
                     </Text>
                   </Button>
                 </TouchableOpacity>
-              )}
+              ) : null}
             </View>
-          ) : null}
+          ) : null} */}
         </View>
       </ScrollView>
     </SafeAreaView>

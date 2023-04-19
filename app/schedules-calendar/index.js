@@ -107,47 +107,8 @@ function SchedulesCalendar() {
                 },
               }}
               onDayPress={(date) => {
-                /* setSchedules({
-                  ...schedules,
-                  [selectedDate]: {
-                    periods: schedules[selectedDate].periods.filter(
-                      (period) => !period.indicator
-                    ),
-                  },
-                }); */
                 setSelectedDate(date.dateString);
                 setRefresh(true);
-
-                /* if (schedules[date.dateString]) {
-                  setSchedules({
-                    ...schedules,
-                    [date.dateString]: {
-                      periods: [
-                        ...schedules[date.dateString].periods,
-                        {
-                          startingDay: true,
-                          endingDay: true,
-                          color: "#5f9ea0",
-                          indicator: true,
-                        },
-                      ],
-                    },
-                  });
-                } else {
-                  setSchedules((prevState) => ({
-                    ...prevState,
-                    [date.dateString]: {
-                      periods: [
-                        {
-                          startingDay: true,
-                          endingDay: true,
-                          color: "#5f9ea0",
-                          indicator: true,
-                        },
-                      ],
-                    },
-                  }));
-                } */
               }}
             />
           }

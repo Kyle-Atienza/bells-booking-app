@@ -15,7 +15,7 @@ import { getInquiries } from "../../../services";
 import { UtilitiesContext } from "../../../contexts";
 import { DateTime } from "luxon";
 
-export const Inquiries = ({ header, filteredByDate }) => {
+export const Inquiries = ({ header, filteredByDate, limit }) => {
   const theme = useTheme();
   const router = useRouter();
 
@@ -67,8 +67,33 @@ export const Inquiries = ({ header, filteredByDate }) => {
 
   useEffect(() => {
     setSearchResults(
-      data?.filter((item) =>
-        item.name.toLowerCase().includes(search.toLowerCase())
+      data?.filter(
+        (item) =>
+          item.name.toLowerCase().includes(search.toLowerCase()) ||
+          DateTime.fromISO(item.apt_date_to)
+            .toFormat("LLLL dd yyyy")
+            .toLowerCase()
+            .includes(search.toLowerCase()) ||
+          DateTime.fromISO(item.apt_date_from)
+            .toFormat("LLLL dd yyyy")
+            .toLowerCase()
+            .includes(search.toLowerCase()) ||
+          DateTime.fromISO(item.apt_date_to)
+            .toFormat("LLL dd yyyy")
+            .toLowerCase()
+            .includes(search.toLowerCase()) ||
+          DateTime.fromISO(item.apt_date_from)
+            .toFormat("LLL dd yyyy")
+            .toLowerCase()
+            .includes(search.toLowerCase()) ||
+          DateTime.fromISO(item.event_date)
+            .toFormat("LLLL dd yyyy")
+            .toLowerCase()
+            .includes(search.toLowerCase()) ||
+          DateTime.fromISO(item.event_date)
+            .toFormat("LLL dd yyyy")
+            .toLowerCase()
+            .includes(search.toLowerCase())
       )
     );
   }, [search]);
@@ -79,6 +104,18 @@ export const Inquiries = ({ header, filteredByDate }) => {
     }
     setRefresh(false);
   }, [refresh]);
+
+  const visibleData = () => {
+    if (!search) {
+      if (!limit) {
+        return data;
+      }
+
+      return data.slice(0, limit);
+    }
+
+    return searchResults;
+  };
 
   const headerComponent = () => {
     return (
@@ -94,7 +131,7 @@ export const Inquiries = ({ header, filteredByDate }) => {
         >
           <>
             <TextInput
-              label="Enter name, inspection"
+              label="Enter name or date"
               value={search}
               onChangeText={(text) => setSearch(text)}
               style={{ backgroundColor: "#fff", flex: 1 }}
@@ -157,9 +194,7 @@ export const Inquiries = ({ header, filteredByDate }) => {
       <View>
         <FlatList
           showsVerticalScrollIndicator={false}
-          data={
-            !isLoading && data.length ? (!search ? data : searchResults) : [{}]
-          }
+          data={!isLoading && data.length ? visibleData() : [{}]}
           renderItem={({ item }) => {
             return renderItem(item);
           }}

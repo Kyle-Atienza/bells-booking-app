@@ -58,7 +58,6 @@ export const useInquiry = () => {
 
   const mapDataFromDb = (data, inquiryId) => {
     const currentData = data.find((item) => item.id === parseInt(inquiryId));
-    console.log(currentData.downpayment_due);
 
     return {
       inquiryType: currentData.type,
