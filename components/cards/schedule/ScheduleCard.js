@@ -17,9 +17,21 @@ export const ScheduleCard = ({ data }) => {
   }, [data]);
 
   const cardStatus = () => {
-    if (parseFloat(data.downpayment) === 0) return "Inquiry | ";
-    if (isPaid) return "Confirmed | ";
-    return "With Downpayment | ";
+    if (
+      data.downpayment_due === "1970-01-01T05:00:00.000Z" &&
+      parseFloat(data.balance) !== 0
+    ) {
+      if (parseFloat(data.downpayment)) {
+        return "With Downpayment";
+      }
+      return "Inquiry";
+    } else {
+      if (isPaid) {
+        return "Confirmed";
+      } else {
+        return "With Downpayment Due";
+      }
+    }
   };
 
   const cardChips = () => {
@@ -111,6 +123,7 @@ export const ScheduleCard = ({ data }) => {
         <Text variant="titleSmall">
           <>
             {cardStatus()}
+            {" | "}
             {capitalize(data.type)}
           </>
         </Text>

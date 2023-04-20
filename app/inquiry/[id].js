@@ -43,6 +43,7 @@ const Inquire = () => {
 
   const [inquiryType, setInquiryType] = useState(undefined);
   const [newInquiry, setNewInquiry] = useState(undefined);
+  const [pendingInquiry, setPendingInquiry] = useState(undefined);
   const [hasDownpayment, setHasDownpayment] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -116,10 +117,10 @@ const Inquire = () => {
     setAmountData(
       compute(newInquiry, inquiryType, priceData, formData, amountData)
     );
-    console.log(configurations);
   }, [formData, refresh, priceData]);
 
   useEffect(() => {
+    console.log("fetch");
     if (inquiryId === "apartment" || inquiryId === "event") {
       resetData(setFormData, setAmountData, setPriceData);
 
@@ -141,6 +142,10 @@ const Inquire = () => {
           }));
           setPriceData(mappedResponse.prices);
           setHasDownpayment(!!mappedResponse.formData.downpayment);
+          setPendingInquiry(
+            !mappedResponse.formData.downpaymentDue &&
+              !mappedResponse.formData.downpayment
+          );
         })
         .catch((e) => {
           console.log(e);
@@ -192,13 +197,17 @@ const Inquire = () => {
             hasDownpayment={hasDownpayment}
           />
           <InquiryButton
+            inquiryId={inquiryId}
             formData={formData}
             amountData={amountData}
             hasDownpayment={hasDownpayment}
             newInquiry={newInquiry}
+            pendingInquiry={pendingInquiry}
             onPayment={(type, amount) => onPayment(type, amount)}
             onSubmit={onSubmit}
             inquiryType={inquiryType}
+            setRefresh={() => setRefresh(true)}
+            setIsLoading={setIsLoading}
           />
         </View>
       </ScrollView>

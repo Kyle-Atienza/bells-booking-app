@@ -37,8 +37,6 @@ const Layout = () => {
       .then((res) => {
         const fetchedConfigs = res.data.data;
 
-        console.log(fetchedConfigs);
-
         setConfigurations(
           fetchedConfigs.reduce((mappedConfigs, config) => {
             mappedConfigs[config.key] = config.value;

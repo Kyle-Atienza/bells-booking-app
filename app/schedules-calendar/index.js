@@ -11,6 +11,8 @@ import { Calendar } from "react-native-calendars";
 import { getDatesInRange } from "../../helpers/scheduleHelper";
 import { globalStyles } from "../../styles";
 import { UtilitiesContext } from "../../contexts";
+import { log } from "react-native-reanimated";
+import { inquiryStatus } from "../../helpers/inqiuryHelper";
 
 function SchedulesCalendar() {
   const theme = useTheme();
@@ -25,6 +27,12 @@ function SchedulesCalendar() {
       .toFormat("yyyy LL dd")
       .replaceAll(" ", "-")
   );
+  const dotKeys = {
+    inquiry: { key: "inquiry", color: "#b8e3fd" },
+    withDownpaymentDue: { key: "withDownpaymentDue", color: "#f195e9" },
+    withDownpayment: { key: "withDownpayment", color: "#f8a8b2" },
+    confirmed: { key: "confirmed", color: "#b6fbb6" },
+  };
 
   useEffect(() => {
     setIsLoading(true);
@@ -38,6 +46,7 @@ function SchedulesCalendar() {
               startDate: DateTime.fromISO(data.event_date)
                 .toFormat("yyyy LL dd")
                 .replaceAll(" ", "-"),
+              status: inquiryStatus(data),
             };
           }
           if (data.type === "apartment") {
@@ -49,12 +58,17 @@ function SchedulesCalendar() {
               endDate: DateTime.fromISO(data.apt_date_to)
                 .toFormat("yyyy LL dd")
                 .replaceAll(" ", "-"),
+              status: inquiryStatus(data),
             };
           }
+
           return data;
         });
 
+        // console.log(innerData);
+
         setSchedules(getDatesInRange(mappedData));
+        console.log(schedules);
         setIsLoading(false);
       })
       .catch((e) => {
@@ -92,18 +106,12 @@ function SchedulesCalendar() {
                   backgroundColor: "green",
                 },
               }}
-              markingType="multi-period"
+              markingType={"multi-dot"}
               markedDates={{
                 ...schedules,
                 [selectedDate]: {
-                  periods: [
-                    {
-                      startingDay: true,
-                      endingDay: true,
-                      color: "#5f9ea0",
-                      indicator: true,
-                    },
-                  ],
+                  dots: schedules[selectedDate]?.dots,
+                  selected: true,
                 },
               }}
               onDayPress={(date) => {

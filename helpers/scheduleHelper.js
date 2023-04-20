@@ -1,5 +1,27 @@
 const colors = ["#b8e3fd", "#b6fbb6", "#f195e9", "#f8a8b2"];
 
+const dotKeys = {
+  inquiry: { key: "inquiry", color: "#b8e3fd" },
+  withDownpaymentDue: { key: "withDownpaymentDue", color: "#ee71ff" },
+  withDownpayment: { key: "withDownpayment", color: "#ff8a98" },
+  confirmed: { key: "confirmed", color: "#b6fbb6" },
+};
+
+const mapStatusToDots = (status) => {
+  switch (status) {
+    case "Inquiry":
+      return dotKeys.inquiry;
+    case "With Downpayment Due":
+      return dotKeys.withDownpaymentDue;
+    case "With Downpayment":
+      return dotKeys.withDownpayment;
+    case "Confirmed":
+      return dotKeys.confirmed;
+    default:
+      break;
+  }
+};
+
 export const getDatesInRange = (datesArray) => {
   let datesObj = {};
   let colorIndex = 0;
@@ -8,6 +30,8 @@ export const getDatesInRange = (datesArray) => {
     if (colorIndex >= datesArray.length - 2) {
       colorIndex = 0;
     }
+
+    console.log(datesArray[i].status);
 
     let currentDate = new Date(datesArray[i].startDate);
     let endDate = datesArray[i].endDate
@@ -19,8 +43,13 @@ export const getDatesInRange = (datesArray) => {
       if (!datesObj[dateString]) {
         datesObj[dateString] = {
           periods: [],
+          dots: [],
         };
       }
+      datesObj[dateString].dots = [
+        ...datesObj[dateString].dots,
+        mapStatusToDots(datesArray[i].status),
+      ];
       datesObj[dateString].periods.push({
         color: colors[colorIndex],
         id: datesArray[i].id,
@@ -35,8 +64,13 @@ export const getDatesInRange = (datesArray) => {
       if (!datesObj[dateString]) {
         datesObj[dateString] = {
           periods: [],
+          dots: [],
         };
       }
+      datesObj[dateString].dots = [
+        ...datesObj[dateString].dots,
+        mapStatusToDots(datesArray[i].status),
+      ];
       datesObj[dateString].periods.push({
         color: colors[colorIndex],
         id: datesArray[i].id,

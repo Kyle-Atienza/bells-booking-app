@@ -12,6 +12,10 @@ export const createInquiry = async (data) => {
   return await appAxios.post(`${API_URL}`, data);
 };
 
+export const updateInquiry = async ({ id, data }) => {
+  return await appAxios.put(`${API_URL}/${id}`, data);
+};
+
 export const payInquiry = async ({ id, data }) => {
   return await appAxios.post(`${API_URL}/${id}/pay`, data);
 };

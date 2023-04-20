@@ -110,8 +110,6 @@ export const compute = (
   let totalAmountDue = 0;
   let balance = 0;
 
-  console.log(inquiryType, prices, formData);
-
   if (inquiryType === "apartment") {
     if (
       !!formData.range.startDate &&
@@ -141,4 +139,22 @@ export const compute = (
     totalAmountDue,
     balance,
   };
+};
+
+export const inquiryStatus = (data) => {
+  if (
+    data.downpayment_due === "1970-01-01T05:00:00.000Z" &&
+    parseFloat(data.balance) !== 0
+  ) {
+    if (parseFloat(data.downpayment)) {
+      return "With Downpayment";
+    }
+    return "Inquiry";
+  } else {
+    if (parseFloat(data.balance) === 0) {
+      return "Confirmed";
+    } else {
+      return "With Downpayment Due";
+    }
+  }
 };
