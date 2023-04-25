@@ -9,5 +9,6 @@ export const getConfigurations = async () => {
 };
 
 export const updateConfigurations = async (data) => {
+  console.log(data);
   return await appAxios.post(`${API_URL}`, data);
 };

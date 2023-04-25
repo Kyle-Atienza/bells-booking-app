@@ -39,11 +39,13 @@ const Layout = () => {
 
         setConfigurations(
           fetchedConfigs.reduce((mappedConfigs, config) => {
-            mappedConfigs[config.key] = config.value;
+            mappedConfigs[config.key] = parseFloat(config.value);
 
             return mappedConfigs;
           }, {})
         );
+
+        console.log("configurations", configurations);
       })
       .catch((e) => {
         console.log(e);

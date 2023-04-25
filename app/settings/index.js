@@ -26,23 +26,13 @@ const Settings = () => {
   const theme = useTheme();
   const router = useRouter();
 
-  const { setRefresh, configurations, setConfigurations } =
+  const { refresh, setRefresh, configurations, setConfigurations } =
     useContext(UtilitiesContext);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    APARTMENT_PRICE: null,
-  });
+  const [formData, setFormData] = useState({});
 
   const onSubmit = (name) => {
-    if (!formData[name] || !parseFloat(formData[name])) {
-      alert("Invalid value");
-    }
-
-    if (parseFloat(formData[name]) === parseFloat(configurations[name])) {
-      alert("Please enter another value");
-    }
-
     Alert.alert(
       "Confirm",
       `Are you sure you want to update ${name}?`,
@@ -53,15 +43,18 @@ const Settings = () => {
             setIsLoading(true);
             updateConfigurations({
               key: name,
-              value: formData[name],
+              value: parseFloat(formData[name]).toString(),
             })
               .then((res) => {
                 setRefresh(true);
+                setConfigurations((prevState) => ({
+                  [res.data.data.key]: parseFloat(res.data.data.value),
+                }));
+                console.log(res);
                 setIsLoading(false);
               })
               .catch((e) => {
                 console.log(e);
-
                 setIsLoading(false);
               });
           },
@@ -74,7 +67,17 @@ const Settings = () => {
     );
   };
 
-  useEffect(() => {});
+  const inputValue = (value) => {
+    if (value === "NaN" || !value) {
+      return "0.00";
+    }
+
+    return parseFloat(value).toString();
+  };
+
+  useEffect(() => {
+    setFormData(configurations);
+  }, []);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -102,11 +105,7 @@ const Settings = () => {
               <TextInput
                 keyboardType="number-pad"
                 placeholder="0.00"
-                value={
-                  formData.APARTMENT_PRICE ||
-                  configurations.APARTMENT_PRICE ||
-                  ""
-                }
+                value={inputValue(formData.APARTMENT_PRICE)}
                 onChangeText={(text) =>
                   setFormData((prevState) => ({
                     ...prevState,
@@ -145,11 +144,7 @@ const Settings = () => {
               <TextInput
                 keyboardType="number-pad"
                 placeholder="0.00"
-                value={
-                  formData.EVENT_BASE_PRICE ||
-                  configurations.EVENT_BASE_PRICE ||
-                  ""
-                }
+                value={inputValue(formData.EVENT_BASE_PRICE)}
                 onChangeText={(text) =>
                   setFormData((prevState) => ({
                     ...prevState,
@@ -185,11 +180,7 @@ const Settings = () => {
               <TextInput
                 keyboardType="number-pad"
                 placeholder="0.00"
-                value={
-                  formData.APARTMENT_ADDON_PRICE ||
-                  configurations.APARTMENT_ADDON_PRICE ||
-                  ""
-                }
+                value={inputValue(formData.APARTMENT_ADDON_PRICE)}
                 onChangeText={(text) =>
                   setFormData((prevState) => ({
                     ...prevState,

@@ -28,7 +28,7 @@ const Login = () => {
   const onLogin = () => {
     setIsLoading(true);
     login({
-      email: formData.usernameEmail,
+      email: formData.usernameEmail.toLowerCase(),
       password: formData.password,
     })
       .then((res) => {
