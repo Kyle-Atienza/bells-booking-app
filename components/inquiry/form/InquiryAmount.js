@@ -5,6 +5,8 @@ import { checkInputFloor, checkInputLimit } from "../../../helpers/typeHelper";
 import { globalStyles } from "../../../styles";
 import { DataCard } from "../../cards";
 import { DatePicker } from "./DatePicker";
+import { useEffect, useState } from "react";
+import { inquiryStatus } from "../../../helpers/inqiuryHelper";
 
 export const InquiryAmount = ({
   formData,
@@ -20,6 +22,12 @@ export const InquiryAmount = ({
     parseFloat(formData.downpayment) &&
     parseFloat(amountData.balance) !== 0 &&
     hasDownpayment;
+
+  const [status, setStatus] = useState("");
+
+  useEffect(() => {
+    console.log(inquiryStatus(formData));
+  }, []);
 
   return (
     <>

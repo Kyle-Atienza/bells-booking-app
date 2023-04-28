@@ -32,30 +32,45 @@ const Settings = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({});
 
-  const onSubmit = (name) => {
+  const parseConfigName = (name) => {
+    const lowercase = name.toLowerCase().replaceAll("_", " ");
+    const capitalized =
+      lowercase.slice(0, 1).toUpperCase() + lowercase.slice(1);
+
+    return capitalized;
+  };
+
+  const onSubmit = () => {
     Alert.alert(
       "Confirm",
-      `Are you sure you want to update ${name}?`,
+      `Are you sure you want to update`,
       [
         {
           text: "OK",
           onPress: () => {
             setIsLoading(true);
-            updateConfigurations({
-              key: name,
-              value: parseFloat(formData[name]).toString(),
-            })
+            updateConfigurations(formData)
               .then((res) => {
                 setRefresh(true);
-                setConfigurations((prevState) => ({
-                  [res.data.data.key]: parseFloat(res.data.data.value),
-                }));
-                console.log(res);
+                setConfigurations(() => {
+                  return res.data.data.reduce((updated, config) => {
+                    updated[config.key] = config.value;
+                    return updated;
+                  }, {});
+                });
                 setIsLoading(false);
+
+                Alert.alert("Success", "Price successfully updated", [], {
+                  cancelable: true,
+                });
               })
               .catch((e) => {
                 console.log(e);
                 setIsLoading(false);
+
+                Alert.alert("Failed", "Price update failed", [], {
+                  cancelable: true,
+                });
               });
           },
           style: "default",
@@ -69,7 +84,7 @@ const Settings = () => {
 
   const inputValue = (value) => {
     if (value === "NaN" || !value) {
-      return "0.00";
+      return "";
     }
 
     return parseFloat(value).toString();
@@ -116,7 +131,7 @@ const Settings = () => {
                 mode="outlined"
                 dense
               />
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 style={{
                   backgroundColor: theme.colors.primaryContainer,
                   borderRadius: SIZES.medium,
@@ -128,7 +143,7 @@ const Settings = () => {
                   iconColor={theme.colors.primary}
                   size={20}
                 />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
           </View>
         </View>
@@ -155,7 +170,7 @@ const Settings = () => {
                 mode="outlined"
                 dense
               />
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 style={{
                   backgroundColor: theme.colors.primaryContainer,
                   borderRadius: SIZES.medium,
@@ -167,7 +182,7 @@ const Settings = () => {
                   iconColor={theme.colors.primary}
                   size={20}
                 />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
           </View>
           <View
@@ -191,7 +206,7 @@ const Settings = () => {
                 mode="outlined"
                 dense
               />
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 style={{
                   backgroundColor: theme.colors.primaryContainer,
                   borderRadius: SIZES.medium,
@@ -203,11 +218,11 @@ const Settings = () => {
                   iconColor={theme.colors.primary}
                   size={20}
                 />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
           </View>
         </View>
-        {/* <View style={globalStyles.container}>
+        <View style={globalStyles.container}>
           <TouchableOpacity onPress={() => onSubmit()}>
             <Button style={globalStyles.button.primary(theme.colors.primary)}>
               <Text variant="labelLarge" style={{ color: "#fff" }}>
@@ -215,7 +230,7 @@ const Settings = () => {
               </Text>
             </Button>
           </TouchableOpacity>
-        </View> */}
+        </View>
       </View>
     </SafeAreaView>
   );

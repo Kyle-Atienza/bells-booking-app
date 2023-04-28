@@ -30,7 +30,7 @@ export const mapDataToDb = (
     estimated_pax: formData.estPax,
     event_date:
       inquiryType === "event"
-        ? DateTime.fromISO(formData.date.toISOString())
+        ? DateTime.fromISO(formData.date)
             .toFormat("yyyy LL dd")
             .replaceAll(" ", "-")
         : null,
@@ -40,13 +40,13 @@ export const mapDataToDb = (
       inquiryType === "event" ? parseRangeTime(formData.schedule)[1] : null,
     apt_date_from:
       inquiryType === "apartment"
-        ? DateTime.fromISO(formData.range.startDate.toISOString())
+        ? DateTime.fromISO(formData.range.startDate)
             .toFormat("yyyy LL dd")
             .replaceAll(" ", "-")
         : null,
     apt_date_to:
       inquiryType === "apartment"
-        ? DateTime.fromISO(formData.range.endDate.toISOString())
+        ? DateTime.fromISO(formData.range.endDate)
             .toFormat("yyyy LL dd")
             .replaceAll(" ", "-")
         : null,
@@ -72,10 +72,10 @@ export const mapDataFromDb = (data, inquiryId) => {
     formData: {
       name: currentData.name,
       range: {
-        startDate: new Date(currentData.apt_date_from),
-        endDate: new Date(currentData.apt_date_to),
+        startDate: new Date(currentData.apt_date_from).toISOString(),
+        endDate: new Date(currentData.apt_date_to).toISOString(),
       },
-      date: new Date(currentData.event_date),
+      date: new Date(currentData.event_date).toISOString(),
       schedule: `${currentData.event_time_from} to ${currentData.event_time_to}`,
       estPax: currentData.estimated_pax.toString(),
       discount: parseFloat(currentData.discount)
@@ -83,7 +83,7 @@ export const mapDataFromDb = (data, inquiryId) => {
         : null,
       downpaymentDue:
         currentData.downpayment_due !== "1970-01-01T05:00:00.000Z"
-          ? new Date(currentData.downpayment_due)
+          ? new Date(currentData.downpayment_due).toISOString()
           : null,
       downpayment: parseFloat(currentData.downpayment)
         ? parseFloat(currentData.downpayment).toString()
@@ -116,8 +116,8 @@ export const compute = (
       !!formData.range.endDate &&
       formData.apartmentCount
     ) {
-      const startDate = new Date(formData.range.startDate.toISOString());
-      const endDate = new Date(formData.range.endDate.toISOString());
+      const startDate = new Date(formData.range.startDate);
+      const endDate = new Date(formData.range.endDate);
       const days = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24));
 
       subTotal = formData.apartmentCount * prices.APARTMENT_PRICE * days;
@@ -142,19 +142,15 @@ export const compute = (
 };
 
 export const inquiryStatus = (data) => {
-  if (
-    data.downpayment_due === "1970-01-01T05:00:00.000Z" &&
-    parseFloat(data.balance) !== 0
-  ) {
-    if (parseFloat(data.downpayment)) {
-      return "With Downpayment";
-    }
-    return "Inquiry";
+  if (parseFloat(data.balance) === 0) {
+    return "Fully Paid";
   } else {
-    if (parseFloat(data.balance) === 0) {
+    if (parseFloat(data.downpayment)) {
       return "Confirmed";
-    } else {
+    } else if (data.downpayment_due !== "1970-01-01T05:00:00.000Z") {
       return "With Downpayment Due";
     }
   }
+
+  return "Inquiry";
 };

@@ -3,8 +3,8 @@ const colors = ["#b8e3fd", "#b6fbb6", "#f195e9", "#f8a8b2"];
 const dotKeys = {
   inquiry: { key: "inquiry", color: "#b8e3fd" },
   withDownpaymentDue: { key: "withDownpaymentDue", color: "#ee71ff" },
-  withDownpayment: { key: "withDownpayment", color: "#ff8a98" },
-  confirmed: { key: "confirmed", color: "#b6fbb6" },
+  withDownpayment: { key: "withDownpayment", color: " #b6fbb6" },
+  confirmed: { key: "confirmed", color: "#deff8a" },
 };
 
 const mapStatusToDots = (status) => {
@@ -13,9 +13,9 @@ const mapStatusToDots = (status) => {
       return dotKeys.inquiry;
     case "With Downpayment Due":
       return dotKeys.withDownpaymentDue;
-    case "With Downpayment":
-      return dotKeys.withDownpayment;
     case "Confirmed":
+      return dotKeys.withDownpayment;
+    case "Fully Paid":
       return dotKeys.confirmed;
     default:
       break;
@@ -30,8 +30,6 @@ export const getDatesInRange = (datesArray) => {
     if (colorIndex >= datesArray.length - 2) {
       colorIndex = 0;
     }
-
-    console.log(datesArray[i].status);
 
     let currentDate = new Date(datesArray[i].startDate);
     let endDate = datesArray[i].endDate

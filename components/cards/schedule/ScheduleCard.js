@@ -6,6 +6,7 @@ import { capitalize } from "../../../helpers/typeHelper";
 import { DateTime } from "luxon";
 import { formatTime } from "../../../helpers/timeHelper";
 import { SIZES } from "../../../constants";
+import { inquiryStatus } from "../../../helpers/inqiuryHelper";
 
 export const ScheduleCard = ({ data }) => {
   const theme = useTheme();
@@ -15,24 +16,6 @@ export const ScheduleCard = ({ data }) => {
   useEffect(() => {
     setisPaid(parseFloat(data.balance) === 0);
   }, [data]);
-
-  const cardStatus = () => {
-    if (
-      data.downpayment_due === "1970-01-01T05:00:00.000Z" &&
-      parseFloat(data.balance) !== 0
-    ) {
-      if (parseFloat(data.downpayment)) {
-        return "With Downpayment";
-      }
-      return "Inquiry";
-    } else {
-      if (isPaid) {
-        return "Confirmed";
-      } else {
-        return "With Downpayment Due";
-      }
-    }
-  };
 
   const cardChips = () => {
     const type = data.type;
@@ -122,7 +105,7 @@ export const ScheduleCard = ({ data }) => {
         </View>
         <Text variant="titleSmall">
           <>
-            {cardStatus()}
+            {inquiryStatus(data)}
             {" | "}
             {capitalize(data.type)}
           </>

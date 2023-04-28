@@ -4,8 +4,8 @@ import { View, SafeAreaView } from "react-native";
 import { Text } from "react-native-paper";
 import { useTheme } from "react-native-paper";
 
-import { Inquiries } from "../../components/common";
-import { globalStyles } from "../../styles";
+import { Inquiries } from "../../../components/common";
+import { globalStyles } from "../../../styles";
 
 const Schedule = () => {
   const theme = useTheme();

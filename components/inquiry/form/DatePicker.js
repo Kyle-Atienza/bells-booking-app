@@ -1,40 +1,68 @@
 import { DateTime } from "luxon";
-import React, { useEffect } from "react";
-import { TouchableOpacity, View } from "react-native";
-import { IconButton, TextInput, useTheme } from "react-native-paper";
+import React, { useEffect, useState } from "react";
+import { Modal, SafeAreaView, TouchableOpacity, View } from "react-native";
+import { IconButton, Text, TextInput, useTheme } from "react-native-paper";
 import { DatePickerModal } from "react-native-paper-dates";
 import { SIZES } from "../../../constants";
+import { Calendar } from "react-native-calendars";
+import { useInquiry } from "../../../hooks";
+import { globalStyles } from "../../../styles";
 
 export const DatePicker = ({ date, setDate, ...rest }) => {
   const theme = useTheme();
 
-  const [open, setOpen] = React.useState(false);
+  const { schedules } = useInquiry();
 
-  const onDismissSingle = React.useCallback(() => {
-    setOpen(false);
-  }, [setOpen]);
-
-  const onConfirmSingle = React.useCallback(
-    (params) => {
-      setOpen(false);
-      setDate(params.date);
-    },
-    [setOpen, setDate]
-  );
+  const [visible, setVisible] = useState(false);
 
   return (
     <>
+      {visible ? (
+        <Modal visible={visible} animationType="slide">
+          <SafeAreaView>
+            <View>
+              <IconButton
+                onPress={() => setVisible(false)}
+                icon="arrow-left"
+                iconColor={theme.colors.primary}
+                size={20}
+              />
+              <View style={{ ...globalStyles.container }}>
+                <Text>Selected: </Text>
+                <Text variant="headlineSmall">
+                  {date ? DateTime.fromISO(date).toFormat("LLL dd yyyy") : null}
+                </Text>
+              </View>
+              <Calendar
+                minDate={DateTime.fromISO(new Date().toISOString()).toISODate()}
+                theme={{
+                  contentStyle: {
+                    backgroundColor: "green",
+                  },
+                }}
+                markingType={"multi-dot"}
+                markedDates={{
+                  ...schedules,
+                  [DateTime.fromISO(date).toISODate()]: {
+                    dots: schedules[DateTime.fromISO(date).toISODate()]?.dots,
+                    selected: true,
+                  },
+                }}
+                onDayPress={(date) => {
+                  setDate(new Date(date.timestamp).toISOString());
+                }}
+              />
+            </View>
+          </SafeAreaView>
+        </Modal>
+      ) : null}
       <View style={{ flexDirection: "row", gap: SIZES.large }}>
         <View
           pointerEvents="none"
           style={{ flexDirection: "row", gap: SIZES.large, flex: 1 }}
         >
           <TextInput
-            value={
-              date
-                ? DateTime.fromISO(date.toISOString()).toFormat("LLL dd yyyy")
-                : null
-            }
+            value={date ? DateTime.fromISO(date).toFormat("LLL dd yyyy") : null}
             label={"When"}
             style={{ backgroundColor: "#fff", flex: 1 }}
             mode="outlined"
@@ -47,7 +75,7 @@ export const DatePicker = ({ date, setDate, ...rest }) => {
             backgroundColor: theme.colors.primaryContainer,
             borderRadius: SIZES.medium,
           }}
-          onPress={() => setOpen(true)}
+          onPress={() => setVisible(!visible)}
         >
           <IconButton
             icon="calendar"
@@ -56,13 +84,13 @@ export const DatePicker = ({ date, setDate, ...rest }) => {
           />
         </TouchableOpacity>
       </View>
-      <DatePickerModal
+      {/* <DatePickerModal
         locale="en"
         mode="single"
         visible={open}
         onDismiss={onDismissSingle}
         onConfirm={onConfirmSingle}
-      />
+      /> */}
     </>
   );
 };

@@ -13,6 +13,7 @@ import { globalStyles } from "../../../styles";
 
 import { DatePicker } from "./DatePicker";
 import { DateRangePicker } from "./DateRangePicker";
+import { useEffect } from "react";
 
 export const InquiryInformation = ({
   inquiryType,
@@ -42,12 +43,12 @@ export const InquiryInformation = ({
         return (
           <DateRangePicker
             range={formData.range}
-            setRange={(dates) =>
+            setRange={(dates) => {
               setFormData((prevState) => ({
                 ...prevState,
                 range: dates,
-              }))
-            }
+              }));
+            }}
           />
         );
       }
@@ -57,9 +58,14 @@ export const InquiryInformation = ({
   const optionsLabel = () => {
     if (inquiryType) {
       if (inquiryType === "event") {
-        return "Add on:";
+        return <Text variant="titleMedium">Add on:</Text>;
       } else if (inquiryType === "apartment") {
-        return "# of Apartments";
+        return (
+          <View style={{ flexDirection: "row", gap: 5, alignItems: "center" }}>
+            <Text variant="titleMedium"># of Apartments</Text>
+            {required()}
+          </View>
+        );
       }
     }
   };
@@ -146,9 +152,7 @@ export const InquiryInformation = ({
       >
         {inquiryType ? (
           <>
-            <Text variant="titleMedium">
-              {optionsLabel()} {required()}
-            </Text>
+            {optionsLabel()}
             <View
               style={{
                 flexDirection: "row",

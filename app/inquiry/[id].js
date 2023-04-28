@@ -4,12 +4,11 @@ import {
   View,
   SafeAreaView,
   ScrollView,
-  TouchableOpacity,
-  ActivityIndicator,
+  Alert,
+  BackHandler,
 } from "react-native";
-import { useTheme, Text, Button } from "react-native-paper";
+import { useTheme, Text } from "react-native-paper";
 import { globalStyles } from "../../styles";
-import { APARTMENT_PRICE, SIZES } from "../../constants";
 
 import {
   InquiryInformation,
@@ -65,10 +64,7 @@ const Inquire = () => {
   });
   const [priceData, setPriceData] = useState({});
 
-  // const { validateForm, mapDataFromDb, mapDataToDb } = useInquiry();
-
   const onSubmit = () => {
-    console.log(formData);
     if (!validateForm(inquiryType, { formData, amountData })) {
       alert("Fill up all required forms");
       return;
@@ -78,23 +74,46 @@ const Inquire = () => {
     createInquiry(mapDataToDb(inquiryType, { formData, amountData, priceData }))
       .then((res) => {
         setIsLoading(false);
-        setRefresh(true);
-        route.push("/");
+
+        Alert.alert("Inquiry Created", "Inquiry successfully created", [
+          {
+            text: "OK",
+            onPress: () => {
+              setFormData({
+                name: null,
+                range: { startDate: null, endDate: null },
+                date: null,
+                schedule: null,
+                estPax: null,
+                apartmentCount: null,
+                discount: null,
+                downpayment: null,
+                downpaymentDue: null,
+                payment: null,
+              });
+              setAmountData({
+                subTotal: null,
+                totalAmountDue: null,
+                balance: null,
+              });
+              setPriceData({});
+              route.push("/");
+              setRefresh(true);
+            },
+            style: "default",
+          },
+        ]);
       })
       .catch((e) => {
         console.log(e);
         setIsLoading(false);
+        if (e.response.status === 409) {
+          alert(e.response.data.message);
+        }
       });
   };
 
   const onPayment = (type, amount) => {
-    console.log({
-      id: inquiryId,
-      data: {
-        type: type,
-        amount: amount,
-      },
-    });
     setIsLoading(true);
     payInquiry({
       id: inquiryId,
@@ -105,10 +124,21 @@ const Inquire = () => {
     })
       .then((res) => {
         setIsLoading(false);
-        setRefresh(true);
+        Alert.alert(
+          "Transaction Successful",
+          `${type.slice(0, 1).toUpperCase() + type.slice(1)} Successful`,
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                setRefresh(true);
+              },
+              style: "default",
+            },
+          ]
+        );
       })
       .catch((e) => {
-        console.log(e);
         setIsLoading(false);
       });
   };
@@ -120,13 +150,30 @@ const Inquire = () => {
   }, [formData, refresh, priceData]);
 
   useEffect(() => {
-    console.log("fetch");
     if (inquiryId === "apartment" || inquiryId === "event") {
-      resetData(setFormData, setAmountData, setPriceData);
+      setFormData({
+        name: null,
+        range: { startDate: null, endDate: null },
+        date: null,
+        schedule: null,
+        estPax: null,
+        apartmentCount: null,
+        discount: null,
+        downpayment: null,
+        downpaymentDue: null,
+        payment: null,
+      });
+      setAmountData({
+        subTotal: null,
+        totalAmountDue: null,
+        balance: null,
+      });
+      setPriceData({});
 
       setInquiryType(inquiryId);
       setNewInquiry(true);
       setPriceData(configurations);
+      setRefresh(false);
     } else {
       setNewInquiry(false);
 
@@ -159,6 +206,17 @@ const Inquire = () => {
     };
   }, [refresh]);
 
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        setRefresh(true);
+      }
+    );
+
+    return () => backHandler.remove();
+  }, []);
+
   return (
     <SafeAreaView>
       <Stack.Screen
@@ -179,6 +237,7 @@ const Inquire = () => {
           },
         }}
       />
+
       {isLoading ? <LoadingScreen /> : null}
       <ScrollView>
         <View style={globalStyles.main}>

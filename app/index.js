@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { View, SafeAreaView, ScrollView, TouchableOpacity } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { Button, Text, useTheme } from "react-native-paper";
@@ -12,16 +12,29 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { SIZES } from "../constants";
 import { useAuth } from "../hooks";
 import { logout } from "../services/auth";
+import { getStats } from "../services/stats";
+import { UtilitiesContext } from "../contexts";
 
 const Dashboard = () => {
   const theme = useTheme();
   const router = useRouter();
 
-  const { onLogout } = useAuth();
+  const { refresh } = useContext(UtilitiesContext);
 
   const [inquiryModal, setInquiryModal] = React.useState({
     visible: false,
   });
+  const [stats, setStats] = useState({});
+
+  useEffect(() => {
+    getStats()
+      .then((res) => {
+        setStats(res.data.data);
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  }, [refresh]);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -53,10 +66,11 @@ const Dashboard = () => {
       <View style={globalStyles.main}>
         <Inquiries
           limit={5}
+          hide={(item) => parseFloat(item.balance) === 0}
           header={
             <>
               <View>
-                <Statistics />
+                <Statistics data={stats} />
               </View>
               <View style={{ marginTop: SIZES.large }}>
                 <TouchableOpacity

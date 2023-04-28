@@ -15,7 +15,7 @@ import { getInquiries } from "../../../services";
 import { UtilitiesContext } from "../../../contexts";
 import { DateTime } from "luxon";
 
-export const Inquiries = ({ header, filteredByDate, limit }) => {
+export const Inquiries = ({ header, filteredByDate, hide, limit }) => {
   const theme = useTheme();
   const router = useRouter();
 
@@ -111,10 +111,11 @@ export const Inquiries = ({ header, filteredByDate, limit }) => {
         return data;
       }
 
-      return data.slice(0, limit);
+      return hide
+        ? data.slice(0, limit).filter((item) => !hide(item))
+        : data.slice(0, limit);
     }
-
-    return searchResults;
+    return hide ? searchResults.filter((item) => hide(item)) : searchResults;
   };
 
   const headerComponent = () => {

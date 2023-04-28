@@ -18,12 +18,12 @@ export const DrawerContent = () => {
       />
       <DrawerItem
         label="Schedules"
-        onPress={() => router.push("schedule")}
+        onPress={() => router.push("schedules/list")}
         icon={() => <Ionicons name="list" size={24} />}
       />
       <DrawerItem
         label="Calendar"
-        onPress={() => router.push("schedules-calendar")}
+        onPress={() => router.push("schedules/calendar")}
         icon={() => <Ionicons name="calendar" size={24} />}
       />
       <DrawerItem

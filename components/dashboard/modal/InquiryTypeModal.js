@@ -3,9 +3,13 @@ import React from "react";
 import { TouchableOpacity, View } from "react-native";
 import { Chip, Modal, Portal, Text } from "react-native-paper";
 import { SIZES } from "../../../constants";
+import { useContext } from "react";
+import { UtilitiesContext } from "../../../contexts";
 
 export const InquiryTypeModal = ({ visible, hideModal }) => {
   const router = useRouter();
+
+  const { setRefresh } = useContext(UtilitiesContext);
 
   return (
     <Portal>
@@ -31,6 +35,7 @@ export const InquiryTypeModal = ({ visible, hideModal }) => {
             <TouchableOpacity
               onPress={() => {
                 router.push("/inquiry/apartment");
+                setRefresh(true);
                 hideModal();
               }}
             >
@@ -41,6 +46,7 @@ export const InquiryTypeModal = ({ visible, hideModal }) => {
             <TouchableOpacity
               onPress={() => {
                 router.push("/inquiry/event");
+                setRefresh(true);
                 hideModal();
               }}
             >

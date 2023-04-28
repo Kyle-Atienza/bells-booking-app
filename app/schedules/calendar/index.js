@@ -3,16 +3,15 @@ import React, { useContext, useEffect, useState } from "react";
 import { Dimensions, SafeAreaView, StyleSheet, View } from "react-native";
 import { Text, useTheme } from "react-native-paper";
 
-import { getInquiries } from "../../services";
-import { Inquiries, LoadingScreen } from "../../components/common";
+import { getInquiries } from "../../../services";
+import { Inquiries, LoadingScreen } from "../../../components/common";
 
 import { DateTime } from "luxon";
 import { Calendar } from "react-native-calendars";
-import { getDatesInRange } from "../../helpers/scheduleHelper";
-import { globalStyles } from "../../styles";
-import { UtilitiesContext } from "../../contexts";
-import { log } from "react-native-reanimated";
-import { inquiryStatus } from "../../helpers/inqiuryHelper";
+import { getDatesInRange } from "../../../helpers/scheduleHelper";
+import { globalStyles } from "../../../styles";
+import { UtilitiesContext } from "../../../contexts";
+import { inquiryStatus } from "../../../helpers/inqiuryHelper";
 
 function SchedulesCalendar() {
   const theme = useTheme();
@@ -27,12 +26,6 @@ function SchedulesCalendar() {
       .toFormat("yyyy LL dd")
       .replaceAll(" ", "-")
   );
-  const dotKeys = {
-    inquiry: { key: "inquiry", color: "#b8e3fd" },
-    withDownpaymentDue: { key: "withDownpaymentDue", color: "#f195e9" },
-    withDownpayment: { key: "withDownpayment", color: "#f8a8b2" },
-    confirmed: { key: "confirmed", color: "#b6fbb6" },
-  };
 
   useEffect(() => {
     setIsLoading(true);
@@ -65,10 +58,7 @@ function SchedulesCalendar() {
           return data;
         });
 
-        // console.log(innerData);
-
         setSchedules(getDatesInRange(mappedData));
-        console.log(schedules);
         setIsLoading(false);
       })
       .catch((e) => {
@@ -99,26 +89,28 @@ function SchedulesCalendar() {
         {isLoading ? <LoadingScreen /> : null}
         <Inquiries
           header={
-            <Calendar
-              initialDate={selectedDate}
-              theme={{
-                contentStyle: {
-                  backgroundColor: "green",
-                },
-              }}
-              markingType={"multi-dot"}
-              markedDates={{
-                ...schedules,
-                [selectedDate]: {
-                  dots: schedules[selectedDate]?.dots,
-                  selected: true,
-                },
-              }}
-              onDayPress={(date) => {
-                setSelectedDate(date.dateString);
-                setRefresh(true);
-              }}
-            />
+            <>
+              <Calendar
+                initialDate={selectedDate}
+                theme={{
+                  contentStyle: {
+                    backgroundColor: "green",
+                  },
+                }}
+                markingType={"multi-dot"}
+                markedDates={{
+                  ...schedules,
+                  [selectedDate]: {
+                    dots: schedules[selectedDate]?.dots,
+                    selected: true,
+                  },
+                }}
+                onDayPress={(date) => {
+                  setSelectedDate(date.dateString);
+                  setRefresh(true);
+                }}
+              />
+            </>
           }
           filteredByDate={{ selectedDate, schedules }}
         />

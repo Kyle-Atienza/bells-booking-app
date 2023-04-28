@@ -1,8 +1,8 @@
 import React from "react";
 import { globalStyles } from "../../../styles";
 import { Button, Text, useTheme } from "react-native-paper";
-import { TouchableOpacity, View } from "react-native";
-import { updateInquiry } from "../../../services";
+import { Alert, TouchableOpacity, View } from "react-native";
+import { payInquiry, updateInquiry } from "../../../services";
 import { DateTime } from "luxon";
 
 export const InquiryButton = ({
@@ -26,33 +26,61 @@ export const InquiryButton = ({
 
     if (!newInquiry) {
       if (pendingInquiry) {
-        action = () => {
-          if (formData.downpaymentDue) {
+        if (formData.downpaymentDue) {
+          action = () => {
             setIsLoading(true);
             updateInquiry({
               id: inquiryId,
               data: {
-                downpayment_due: DateTime.fromISO(
-                  formData.downpaymentDue.toISOString()
-                )
+                downpayment_due: DateTime.fromISO(formData.downpaymentDue)
                   .toFormat("yyyy LL dd")
                   .replaceAll(" ", "-"),
               },
             })
               .then((res) => {
-                console.log(res);
                 setRefresh();
                 setIsLoading(false);
               })
               .catch((e) => {
                 console.log(e);
+
                 setIsLoading(false);
               });
-          } else {
-            alert("Please add downpayment due date");
-          }
-        };
-        label = "Set Downpayment Due";
+          };
+          label = "Set Downpayment Due";
+        } else if (formData.downpayment) {
+          action = () => {
+            setIsLoading(true);
+            payInquiry({
+              id: inquiryId,
+              data: {
+                type: "downpayment",
+                amount: parseFloat(formData.downpayment),
+              },
+            })
+              .then((res) => {
+                setIsLoading(false);
+                Alert.alert(
+                  "Transaction Successful",
+                  `Downpayment Successful`,
+                  [
+                    {
+                      text: "OK",
+                      onPress: () => {
+                        setRefresh(true);
+                      },
+                      style: "default",
+                    },
+                  ]
+                );
+              })
+              .catch((e) => {
+                console.log(e);
+                setIsLoading(false);
+              });
+          };
+          label = "Pay Downpayment";
+        }
       } else {
         if (!hasDownpayment) {
           action = () => onPayment("downpayment", formData.downpayment);
@@ -99,8 +127,6 @@ export const InquiryButton = ({
     ) : null;
   };
 
-  // console.log("pendingInquiry", pendingInquiry, formData.downpaymentDue);
-
   return (
     <>
       <View style={globalStyles.container}>
@@ -121,42 +147,3 @@ export const InquiryButton = ({
     </>
   );
 };
-
-{
-  /* {newInquiry ? (
-            <TouchableOpacity onPress={() => onSubmit()}>
-              <Button
-                style={globalStyles.button.primary(theme.colors.secondary)}
-              >
-                <Text variant="labelLarge" style={{ color: "#fff" }}>
-                  Add Inquiry
-                </Text>
-              </Button>
-            </TouchableOpacity>
-          ) : formData.downpayment ||
-            formData.payment ||
-            formData.downpaymentDue ? (
-            <TouchableOpacity
-              onPress={() =>
-                onPayment(
-                  !hasDownpayment ? "downpayment" : "payment",
-                  hasDownpayment
-                    ? inquiryType === "apartment"
-                      ? formData.payment
-                      : amountData.balance
-                    : formData.downpayment
-                )
-              }
-            >
-              <Button style={globalStyles.button.primary(theme.colors.primary)}>
-                <Text variant="labelLarge" style={{ color: "#fff" }}>
-                  {hasDownpayment
-                    ? inquiryType === "apartment"
-                      ? "Pay Apartment"
-                      : "Mark as fully paid"
-                    : "Pay Downpayment"}
-                </Text>
-              </Button>
-            </TouchableOpacity>
-          ) : null} */
-}

@@ -4,6 +4,7 @@ import { Drawer } from "expo-router/drawer";
 import {
   MD3LightTheme,
   Provider as PaperProvider,
+  Provider,
   Text,
 } from "react-native-paper";
 import { UtilitiesContext } from "../contexts";
@@ -35,17 +36,12 @@ const Layout = () => {
   const initializeConfigurations = () => {
     getConfigurations()
       .then((res) => {
-        const fetchedConfigs = res.data.data;
-
-        setConfigurations(
-          fetchedConfigs.reduce((mappedConfigs, config) => {
-            mappedConfigs[config.key] = parseFloat(config.value);
-
-            return mappedConfigs;
-          }, {})
-        );
-
-        console.log("configurations", configurations);
+        setConfigurations(() => {
+          return res.data.data.reduce((updated, config) => {
+            updated[config.key] = config.value;
+            return updated;
+          }, {});
+        });
       })
       .catch((e) => {
         console.log(e);

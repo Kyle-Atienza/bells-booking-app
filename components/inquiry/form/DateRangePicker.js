@@ -1,30 +1,119 @@
 import React, { useEffect, useState } from "react";
-import { TouchableOpacity, View } from "react-native";
-import { IconButton, Text, TextInput, useTheme } from "react-native-paper";
-import { DatePickerModal } from "react-native-paper-dates";
+import { Modal, SafeAreaView, TouchableOpacity, View } from "react-native";
+import {
+  Button,
+  IconButton,
+  Text,
+  TextInput,
+  useTheme,
+} from "react-native-paper";
+
 import { SIZES } from "../../../constants";
-import { globalStyles } from "../../../styles";
+
 import { DateTime } from "luxon";
+import { Calendar } from "react-native-calendars";
+import { useInquiry } from "../../../hooks";
+import { globalStyles } from "../../../styles";
+import { useContext } from "react";
+import { UtilitiesContext } from "../../../contexts";
 
 export const DateRangePicker = ({ range, setRange }) => {
   const theme = useTheme();
 
-  const [open, setOpen] = React.useState(false);
+  const { refresh, setRefresh } = useContext(UtilitiesContext);
 
-  const onDismiss = React.useCallback(() => {
-    setOpen(false);
-  }, [setOpen]);
+  const { schedules } = useInquiry();
 
-  const onConfirm = React.useCallback(
-    ({ startDate, endDate }) => {
-      setOpen(false);
-      setRange({ startDate, endDate });
-    },
-    [setOpen, setRange]
-  );
+  const [visible, setVisible] = useState(false);
+  const [start, setStart] = useState(null);
+  const [end, setEnd] = useState(null);
+
+  useEffect(() => {
+    setRange({
+      startDate: start,
+      endDate: end,
+    });
+  }, [start, end]);
+
+  useEffect(() => {
+    setStart(null);
+    setEnd(null);
+    setRefresh(false);
+  }, [refresh]);
 
   return (
     <>
+      {visible ? (
+        <Modal visible={visible} animationType="slide">
+          <SafeAreaView>
+            <View>
+              <IconButton
+                onPress={() => setVisible(false)}
+                icon="arrow-left"
+                iconColor={theme.colors.primary}
+                size={20}
+              />
+              <View
+                style={{
+                  flexDirection: "row",
+                  gap: SIZES.small,
+                  ...globalStyles.container,
+                }}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text>From:</Text>
+                  <Text variant="headlineSmall">
+                    {range.startDate
+                      ? DateTime.fromISO(range.startDate).toFormat(
+                          "LLL dd yyyy"
+                        )
+                      : null}
+                  </Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text>To:</Text>
+                  <Text variant="headlineSmall">
+                    {range.endDate
+                      ? DateTime.fromISO(range.endDate).toFormat("LLL dd yyyy")
+                      : null}
+                  </Text>
+                </View>
+              </View>
+              <TouchableOpacity
+                onPress={() => {
+                  setStart(null);
+                  setEnd(null);
+                }}
+              >
+                <Button>Reset</Button>
+              </TouchableOpacity>
+              <Calendar
+                theme={{
+                  contentStyle: {
+                    backgroundColor: "green",
+                  },
+                }}
+                markingType={"multi-dot"}
+                markedDates={schedules}
+                minDate={
+                  start
+                    ? DateTime.fromISO(start).toISODate()
+                    : DateTime.fromISO(new Date().toISOString()).toISODate()
+                }
+                maxDate={end ? DateTime.fromISO(end).toISODate() : null}
+                onDayPress={(date) => {
+                  if (!start || (start && end)) {
+                    setStart(new Date(date.timestamp).toISOString());
+                    return;
+                  }
+
+                  setEnd(new Date(date.timestamp).toISOString());
+                }}
+              />
+            </View>
+          </SafeAreaView>
+        </Modal>
+      ) : null}
       <View style={{ flexDirection: "row", gap: SIZES.large }}>
         <View
           pointerEvents="none"
@@ -33,9 +122,7 @@ export const DateRangePicker = ({ range, setRange }) => {
           <TextInput
             value={
               range.startDate
-                ? DateTime.fromISO(range.startDate.toISOString()).toFormat(
-                    "LLL dd yyyy"
-                  )
+                ? DateTime.fromISO(range.startDate).toFormat("LLL dd yyyy")
                 : null
             }
             label={"from"}
@@ -46,9 +133,7 @@ export const DateRangePicker = ({ range, setRange }) => {
           <TextInput
             value={
               range.endDate
-                ? DateTime.fromISO(range.endDate.toISOString()).toFormat(
-                    "LLL dd yyyy"
-                  )
+                ? DateTime.fromISO(range.endDate).toFormat("LLL dd yyyy")
                 : null
             }
             label={"to"}
@@ -62,7 +147,7 @@ export const DateRangePicker = ({ range, setRange }) => {
             backgroundColor: theme.colors.primaryContainer,
             borderRadius: SIZES.medium,
           }}
-          onPress={() => setOpen(true)}
+          onPress={() => setVisible(true)}
         >
           <IconButton
             icon="calendar"
@@ -71,15 +156,6 @@ export const DateRangePicker = ({ range, setRange }) => {
           />
         </TouchableOpacity>
       </View>
-      <DatePickerModal
-        locale="en"
-        mode="range"
-        visible={open}
-        onDismiss={onDismiss}
-        startDate={range.startDate}
-        endDate={range.endDate}
-        onConfirm={onConfirm}
-      />
     </>
   );
 };
