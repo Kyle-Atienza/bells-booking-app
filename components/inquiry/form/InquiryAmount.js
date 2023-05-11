@@ -25,10 +25,6 @@ export const InquiryAmount = ({
 
   const [status, setStatus] = useState("");
 
-  useEffect(() => {
-    console.log(inquiryStatus(formData));
-  }, []);
-
   return (
     <>
       <View style={globalStyles.container}>
@@ -53,7 +49,7 @@ export const InquiryAmount = ({
       </View>
       <View style={globalStyles.container}>
         <DataCard label="Total Amount Due" value={amountData.totalAmountDue} />
-        <View
+        {/* <View
           style={{
             marginTop: SIZES.large,
           }}
@@ -68,7 +64,7 @@ export const InquiryAmount = ({
               }))
             }
           />
-        </View>
+        </View> */}
         <View
           style={{
             marginTop: SIZES.large,

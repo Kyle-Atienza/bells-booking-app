@@ -4,12 +4,17 @@ import { parseRangeTime } from "./timeHelper";
 export const validateForm = (inquiryType, { formData, amountData }) => {
   if (
     inquiryType === "event" &&
-    (!formData.name || !formData.date || !formData.schedule || !formData.estPax)
+    (!formData.name ||
+      !formData.date ||
+      !formData.schedule ||
+      !formData.estPax ||
+      !formData.number)
   ) {
     return false;
   } else if (
     inquiryType === "apartment" &&
     (!formData.name ||
+      !formData.number ||
       !formData.range.startDate ||
       !formData.range.endDate ||
       !formData.apartmentCount ||
@@ -27,6 +32,7 @@ export const mapDataToDb = (
   return {
     type: inquiryType,
     name: formData.name,
+    contact_number: formData.number,
     estimated_pax: formData.estPax,
     event_date:
       inquiryType === "event"
@@ -38,6 +44,8 @@ export const mapDataToDb = (
       inquiryType === "event" ? parseRangeTime(formData.schedule)[0] : null,
     event_time_to:
       inquiryType === "event" ? parseRangeTime(formData.schedule)[1] : null,
+    event_type: inquiryType === "event" ? formData.eventType : null,
+    has_catering: inquiryType === "event" ? formData.withCatering : null,
     apt_date_from:
       inquiryType === "apartment"
         ? DateTime.fromISO(formData.range.startDate)
@@ -71,6 +79,7 @@ export const mapDataFromDb = (data, inquiryId) => {
     inquiryType: currentData.type,
     formData: {
       name: currentData.name,
+      number: currentData.contact_number,
       range: {
         startDate: new Date(currentData.apt_date_from).toISOString(),
         endDate: new Date(currentData.apt_date_to).toISOString(),
@@ -89,6 +98,8 @@ export const mapDataFromDb = (data, inquiryId) => {
         ? parseFloat(currentData.downpayment).toString()
         : null,
       apartmentCount: currentData.apt_addon || currentData.apt_qty,
+      withCatering: currentData.has_catering,
+      eventType: currentData.event_type,
     },
     balance: currentData.balance,
     prices: {
@@ -142,14 +153,19 @@ export const compute = (
 };
 
 export const inquiryStatus = (data) => {
+  console.log(data.downpayment_due);
+
+  if (data.status === "cancelled") {
+    return "Cancelled";
+  }
   if (parseFloat(data.balance) === 0) {
     return "Fully Paid";
   } else {
     if (parseFloat(data.downpayment)) {
       return "Confirmed";
-    } else if (data.downpayment_due !== "1970-01-01T05:00:00.000Z") {
+    } /* else if (data.downpayment_due !== "1970-01-01T05:00:00.000Z") {
       return "With Downpayment Due";
-    }
+    } */
   }
 
   return "Inquiry";

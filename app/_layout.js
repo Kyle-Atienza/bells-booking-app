@@ -31,6 +31,7 @@ const Layout = () => {
   const { loggedIn } = useAuth();
 
   const [refresh, setRefresh] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [configurations, setConfigurations] = useState({});
 
   const initializeConfigurations = () => {
@@ -66,7 +67,14 @@ const Layout = () => {
 
   return (
     <UtilitiesContext.Provider
-      value={{ refresh, setRefresh, configurations, setConfigurations }}
+      value={{
+        refresh,
+        setRefresh,
+        configurations,
+        setConfigurations,
+        isLoading,
+        setIsLoading,
+      }}
     >
       <PaperProvider theme={theme}>
         <Drawer

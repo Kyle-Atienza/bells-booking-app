@@ -17,7 +17,7 @@ function SchedulesCalendar() {
   const theme = useTheme();
   const router = useRouter();
 
-  const { setRefresh } = useContext(UtilitiesContext);
+  const { setRefresh, refresh } = useContext(UtilitiesContext);
 
   const [schedules, setSchedules] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -65,7 +65,7 @@ function SchedulesCalendar() {
         console.log(e);
         setIsLoading(false);
       });
-  }, []);
+  }, [refresh]);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>

@@ -134,7 +134,7 @@ export const InquiryButton = ({
           <TouchableOpacity onPress={() => onSubmit()}>
             <Button style={globalStyles.button.primary(theme.colors.secondary)}>
               <Text variant="labelLarge" style={{ color: "#fff" }}>
-                {parseFloat(amountData.balance) === 0
+                {parseFloat(amountData.balance) === 0 && !newInquiry
                   ? "Mark as fully paid"
                   : "Add Inquiry"}
               </Text>

@@ -1,17 +1,33 @@
 import { DateTime } from "luxon";
-import React, { useEffect, useState } from "react";
-import { Modal, SafeAreaView, TouchableOpacity, View } from "react-native";
+import React, { useContext, useEffect, useState } from "react";
+import {
+  Alert,
+  Modal,
+  SafeAreaView,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { IconButton, Text, TextInput, useTheme } from "react-native-paper";
 import { DatePickerModal } from "react-native-paper-dates";
 import { SIZES } from "../../../constants";
 import { Calendar } from "react-native-calendars";
 import { useInquiry } from "../../../hooks";
 import { globalStyles } from "../../../styles";
+import { updateInquiry } from "../../../services";
+import { UtilitiesContext } from "../../../contexts";
 
-export const DatePicker = ({ date, setDate, ...rest }) => {
+export const DatePicker = ({
+  date,
+  setDate,
+  reschedule,
+  inquiryId,
+  ...rest
+}) => {
   const theme = useTheme();
 
   const { schedules } = useInquiry();
+
+  const { setRefresh, isLoading, setIsLoading } = useContext(UtilitiesContext);
 
   const [visible, setVisible] = useState(false);
 
@@ -49,7 +65,46 @@ export const DatePicker = ({ date, setDate, ...rest }) => {
                   },
                 }}
                 onDayPress={(date) => {
-                  setDate(new Date(date.timestamp).toISOString());
+                  if (reschedule) {
+                    Alert.alert(
+                      "Confirm Reschedule",
+                      "Changing the date will reschedule the inquiry. \n\nAre you sure you want to reschedule this inquiry?",
+                      [
+                        {
+                          text: "OK",
+                          onPress: () => {
+                            setIsLoading(true);
+                            setVisible(false);
+                            updateInquiry({
+                              id: inquiryId,
+                              data: {
+                                event_date: DateTime.fromISO(
+                                  new Date(date.timestamp).toISOString()
+                                )
+                                  .toFormat("yyyy LL dd")
+                                  .replaceAll(" ", "-"),
+                              },
+                            })
+                              .then((res) => {
+                                setDate(res.data.data.event_date);
+                                setIsLoading(false);
+                                setRefresh(true);
+                              })
+                              .catch((e) => {
+                                console.log(e);
+                                setIsLoading(false);
+                              });
+                          },
+                          style: "default",
+                        },
+                      ],
+                      {
+                        cancelable: true,
+                      }
+                    );
+                  } else {
+                    setDate(new Date(date.timestamp).toISOString());
+                  }
                 }}
               />
             </View>
@@ -84,13 +139,6 @@ export const DatePicker = ({ date, setDate, ...rest }) => {
           />
         </TouchableOpacity>
       </View>
-      {/* <DatePickerModal
-        locale="en"
-        mode="single"
-        visible={open}
-        onDismiss={onDismissSingle}
-        onConfirm={onConfirmSingle}
-      /> */}
     </>
   );
 };

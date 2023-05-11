@@ -3,7 +3,7 @@ const colors = ["#b8e3fd", "#b6fbb6", "#f195e9", "#f8a8b2"];
 const dotKeys = {
   inquiry: { key: "inquiry", color: "#b8e3fd" },
   withDownpaymentDue: { key: "withDownpaymentDue", color: "#ee71ff" },
-  withDownpayment: { key: "withDownpayment", color: " #b6fbb6" },
+  withDownpayment: { key: "withDownpayment", color: "#b6fbb6" },
   confirmed: { key: "confirmed", color: "#deff8a" },
 };
 

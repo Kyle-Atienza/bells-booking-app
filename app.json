@@ -5,7 +5,7 @@
     "web": {
       "bundler": "metro"
     },
-    "name": "bells-booking-app",
+    "name": "Bell's Booking App",
     "slug": "bells-booking-app",
     "splash": {
       "image": "./assets/images/splash-image.png"

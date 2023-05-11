@@ -13,6 +13,7 @@ export const createInquiry = async (data) => {
 };
 
 export const updateInquiry = async ({ id, data }) => {
+  console.log({ id, data });
   return await appAxios.put(`${API_URL}/${id}`, data);
 };
 

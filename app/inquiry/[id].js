@@ -6,8 +6,9 @@ import {
   ScrollView,
   Alert,
   BackHandler,
+  TouchableOpacity,
 } from "react-native";
-import { useTheme, Text } from "react-native-paper";
+import { useTheme, Text, IconButton, Button } from "react-native-paper";
 import { globalStyles } from "../../styles";
 
 import {
@@ -16,7 +17,12 @@ import {
   InquiryButton,
 } from "../../components/inquiry";
 
-import { createInquiry, getInquiries, payInquiry } from "../../services";
+import {
+  createInquiry,
+  getInquiries,
+  payInquiry,
+  updateInquiry,
+} from "../../services";
 
 import { useInquiry } from "../../hooks";
 import { UtilitiesContext } from "../../contexts";
@@ -29,14 +35,16 @@ import {
 } from "../../helpers/inqiuryHelper";
 import { LoadingScreen } from "../../components/common";
 import { DateTime } from "luxon";
+import { SIZES } from "../../constants";
 
 const Inquire = () => {
   const theme = useTheme();
-  const route = useRouter();
+  const router = useRouter();
 
   const { id: inquiryId } = useSearchParams();
 
-  const { refresh, setRefresh, configurations } = useContext(UtilitiesContext);
+  const { refresh, setRefresh, configurations, isLoading, setIsLoading } =
+    useContext(UtilitiesContext);
 
   const { resetData } = useInquiry();
 
@@ -44,9 +52,10 @@ const Inquire = () => {
   const [newInquiry, setNewInquiry] = useState(undefined);
   const [pendingInquiry, setPendingInquiry] = useState(undefined);
   const [hasDownpayment, setHasDownpayment] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: null,
+    number: null,
     range: { startDate: null, endDate: null },
     date: null,
     schedule: null,
@@ -56,6 +65,8 @@ const Inquire = () => {
     downpayment: null,
     downpaymentDue: null,
     payment: null,
+    withCatering: null,
+    eventType: null,
   });
   const [amountData, setAmountData] = useState({
     subTotal: null,
@@ -90,6 +101,8 @@ const Inquire = () => {
                 downpayment: null,
                 downpaymentDue: null,
                 payment: null,
+                withCatering: null,
+                eventType: null,
               });
               setAmountData({
                 subTotal: null,
@@ -97,7 +110,7 @@ const Inquire = () => {
                 balance: null,
               });
               setPriceData({});
-              route.push("/");
+              router.push("/");
               setRefresh(true);
             },
             style: "default",
@@ -153,6 +166,7 @@ const Inquire = () => {
     if (inquiryId === "apartment" || inquiryId === "event") {
       setFormData({
         name: null,
+        number: null,
         range: { startDate: null, endDate: null },
         date: null,
         schedule: null,
@@ -162,6 +176,8 @@ const Inquire = () => {
         downpayment: null,
         downpaymentDue: null,
         payment: null,
+        withCatering: null,
+        eventType: null,
       });
       setAmountData({
         subTotal: null,
@@ -235,6 +251,59 @@ const Inquire = () => {
               </Text>
             );
           },
+          headerRight: () => {
+            if (!newInquiry) {
+              return (
+                <TouchableOpacity
+                  style={{
+                    flexDirection: "row",
+                    backgroundColor: "#B00020",
+                    borderRadius: 10,
+                    marginRight: SIZES.large,
+                  }}
+                  onPress={() => {
+                    Alert.alert(
+                      "Cancel Inquiry",
+                      "Are you sure you want to cancel this inquiry?",
+                      [
+                        {
+                          text: "OK",
+                          onPress: () => {
+                            setIsLoading(true);
+                            updateInquiry({
+                              id: inquiryId,
+                              data: {
+                                status: "cancelled",
+                              },
+                            })
+                              .then((res) => {
+                                router.push("/");
+                                setIsLoading(false);
+                                setRefresh(true);
+                              })
+                              .catch((e) => {
+                                console.log(e);
+                                setIsLoading(false);
+                              });
+                          },
+                          style: "default",
+                        },
+                      ],
+                      {
+                        cancelable: true,
+                      }
+                    );
+                  }}
+                >
+                  <Button>
+                    <Text style={{ fontSize: 12, color: "#fff" }}>
+                      Cancel Inquiry
+                    </Text>
+                  </Button>
+                </TouchableOpacity>
+              );
+            }
+          },
         }}
       />
 
@@ -246,6 +315,7 @@ const Inquire = () => {
             formData={formData}
             setFormData={setFormData}
             newInquiry={newInquiry}
+            inquiryId={inquiryId}
           />
           <InquiryAmount
             formData={formData}

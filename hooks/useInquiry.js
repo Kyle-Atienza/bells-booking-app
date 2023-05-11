@@ -1,12 +1,15 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { parseRangeTime } from "../helpers/timeHelper";
 import { getInquiries } from "../services";
 import { DateTime } from "luxon";
 import { getDatesInRange } from "../helpers/scheduleHelper";
 import { inquiryStatus } from "../helpers/inqiuryHelper";
+import { UtilitiesContext } from "../contexts";
 
 export const useInquiry = () => {
   const [schedules, setSchedules] = useState({});
+
+  const { refresh, setRefresh } = useContext(UtilitiesContext);
 
   const resetData = (setFormData, setAmountData, setPriceData) => {
     setFormData({
@@ -61,11 +64,17 @@ export const useInquiry = () => {
         });
 
         setSchedules(getDatesInRange(mappedData));
+        if (refresh) {
+          setRefresh(false);
+        }
       })
       .catch((e) => {
         console.log(e);
+        if (refresh) {
+          setRefresh(false);
+        }
       });
-  }, []);
+  }, [refresh]);
 
   return {
     resetData,

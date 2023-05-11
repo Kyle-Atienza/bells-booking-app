@@ -32,7 +32,12 @@ const Login = () => {
       password: formData.password,
     })
       .then((res) => {
-        AsyncStorage.setItem("@accessToken", res.data.data.access_token)
+        const toStore = [
+          ["@accessToken", res.data.data.access_token],
+          ["@userType", res.data.data.me.type],
+        ];
+
+        AsyncStorage.multiSet(toStore)
           .then((res) => {
             router.push("/");
             setRefresh(true);
