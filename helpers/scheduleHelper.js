@@ -4,7 +4,7 @@ const dotKeys = {
   inquiry: { key: "inquiry", color: "#b8e3fd" },
   withDownpaymentDue: { key: "withDownpaymentDue", color: "#ee71ff" },
   withDownpayment: { key: "withDownpayment", color: "#b6fbb6" },
-  confirmed: { key: "confirmed", color: "#deff8a" },
+  confirmed: { key: "confirmed", color: "#f8ef42" },
 };
 
 const mapStatusToDots = (status) => {

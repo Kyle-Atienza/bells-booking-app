@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useState } from "react";
-import { FlatList, TouchableOpacity, View } from "react-native";
+import React, { useCallback, useContext, useEffect, useState } from "react";
+import { FlatList, RefreshControl, TouchableOpacity, View } from "react-native";
 import {
   ActivityIndicator,
   IconButton,
@@ -25,6 +25,7 @@ export const Inquiries = ({ header, filteredByDate, hide, limit }) => {
   const [searchResults, setSearchResults] = useState([]);
 
   const [isLoading, setisLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [data, setData] = useState([]);
 
   const fetchData = () => {
@@ -118,6 +119,13 @@ export const Inquiries = ({ header, filteredByDate, hide, limit }) => {
     return hide ? searchResults.filter((item) => hide(item)) : searchResults;
   };
 
+  const onRefresh = useCallback(() => {
+    setRefresh(true);
+    setTimeout(() => {
+      setRefresh(false);
+    }, 2000);
+  }, []);
+
   const headerComponent = () => {
     return (
       <>
@@ -139,7 +147,7 @@ export const Inquiries = ({ header, filteredByDate, hide, limit }) => {
               mode="outlined"
               dense
             />
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={{
                 backgroundColor: theme.colors.primaryContainer,
                 borderRadius: SIZES.medium,
@@ -151,7 +159,7 @@ export const Inquiries = ({ header, filteredByDate, hide, limit }) => {
                 iconColor={theme.colors.primary}
                 size={20}
               />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </>
         </View>
       </>
@@ -199,12 +207,15 @@ export const Inquiries = ({ header, filteredByDate, hide, limit }) => {
           renderItem={({ item }) => {
             return renderItem(item);
           }}
-          keyExtractor={(item) => item.id || "temp"}
+          keyExtractor={(item) => item?.id || "temp"}
           contentContainerStyle={{
             rowGap: SIZES.large,
             paddingBottom: 50,
           }}
           ListHeaderComponent={headerComponent()}
+          refreshControl={
+            <RefreshControl refreshing={refresh} onRefresh={onRefresh} />
+          }
         />
       </View>
     </View>

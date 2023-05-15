@@ -8,7 +8,9 @@ export const validateForm = (inquiryType, { formData, amountData }) => {
       !formData.date ||
       !formData.schedule ||
       !formData.estPax ||
-      !formData.number)
+      !formData.number ||
+      formData.withCatering === null ||
+      !formData.eventType)
   ) {
     return false;
   } else if (
@@ -74,6 +76,10 @@ export const mapDataToDb = (
 
 export const mapDataFromDb = (data, inquiryId) => {
   const currentData = data.find((item) => item.id === parseInt(inquiryId));
+  console.log(
+    new Date(currentData.event_date).toISOString(),
+    currentData.event_date
+  );
 
   return {
     inquiryType: currentData.type,
@@ -153,8 +159,6 @@ export const compute = (
 };
 
 export const inquiryStatus = (data) => {
-  console.log(data.downpayment_due);
-
   if (data.status === "cancelled") {
     return "Cancelled";
   }

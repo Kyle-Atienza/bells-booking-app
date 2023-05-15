@@ -237,6 +237,9 @@ export const DateRangePicker = ({ range, setRange, reschedule, inquiryId }) => {
                             },
                             style: "default",
                           },
+                          {
+                            text: "Cancel",
+                          },
                         ],
                         { cancelable: true }
                       );

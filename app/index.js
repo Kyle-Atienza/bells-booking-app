@@ -27,6 +27,8 @@ const Dashboard = () => {
   const [stats, setStats] = useState({});
 
   useEffect(() => {
+    console.log("stats");
+
     getStats()
       .then((res) => {
         setStats(res.data.data);
@@ -63,6 +65,7 @@ const Dashboard = () => {
           }))
         }
       />
+
       <View style={globalStyles.main}>
         <Inquiries
           limit={5}

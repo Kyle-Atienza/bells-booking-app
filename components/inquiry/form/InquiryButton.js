@@ -49,36 +49,7 @@ export const InquiryButton = ({
           };
           label = "Set Downpayment Due";
         } else if (formData.downpayment) {
-          action = () => {
-            setIsLoading(true);
-            payInquiry({
-              id: inquiryId,
-              data: {
-                type: "downpayment",
-                amount: parseFloat(formData.downpayment),
-              },
-            })
-              .then((res) => {
-                setIsLoading(false);
-                Alert.alert(
-                  "Transaction Successful",
-                  `Downpayment Successful`,
-                  [
-                    {
-                      text: "OK",
-                      onPress: () => {
-                        setRefresh(true);
-                      },
-                      style: "default",
-                    },
-                  ]
-                );
-              })
-              .catch((e) => {
-                console.log(e);
-                setIsLoading(false);
-              });
-          };
+          action = () => onPayment("payment", amountData.balance);
           label = "Pay Downpayment";
         }
       } else {

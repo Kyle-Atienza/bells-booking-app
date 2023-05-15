@@ -127,33 +127,63 @@ const Inquire = () => {
   };
 
   const onPayment = (type, amount) => {
-    setIsLoading(true);
-    payInquiry({
-      id: inquiryId,
-      data: {
-        type: type,
-        amount: parseFloat(amount),
-      },
-    })
-      .then((res) => {
-        setIsLoading(false);
+    if (parseFloat(amount)) {
+      setIsLoading(true);
+      payInquiry({
+        id: inquiryId,
+        data: {
+          type: type,
+          amount: parseFloat(amount),
+        },
+      })
+        .then((res) => {
+          setIsLoading(false);
+          Alert.alert(
+            "Transaction Successful",
+            `${type.slice(0, 1).toUpperCase() + type.slice(1)} Successful`,
+            [
+              {
+                text: "OK",
+                onPress: () => {
+                  setRefresh(true);
+                },
+                style: "default",
+              },
+            ]
+          );
+        })
+        .catch((e) => {
+          setIsLoading(false);
+        });
+    } else {
+      if (type === "downpayment") {
         Alert.alert(
-          "Transaction Successful",
-          `${type.slice(0, 1).toUpperCase() + type.slice(1)} Successful`,
+          "Empty Value",
+          "Please add Downpayment amount",
           [
             {
               text: "OK",
-              onPress: () => {
-                setRefresh(true);
-              },
-              style: "default",
             },
-          ]
+          ],
+          {
+            cancelable: true,
+          }
         );
-      })
-      .catch((e) => {
-        setIsLoading(false);
-      });
+      } else if (type === "payment") {
+        Alert.alert(
+          "Empty Value",
+          "Please add Payment amount",
+          [
+            {
+              text: "OK",
+            },
+          ],
+          {
+            cancelable: true,
+          }
+        );
+      }
+    }
   };
 
   useEffect(() => {
@@ -277,7 +307,7 @@ const Inquire = () => {
                               },
                             })
                               .then((res) => {
-                                router.push("/");
+                                router.push(-1);
                                 setIsLoading(false);
                                 setRefresh(true);
                               })
@@ -287,6 +317,9 @@ const Inquire = () => {
                               });
                           },
                           style: "default",
+                        },
+                        {
+                          text: "Cancel",
                         },
                       ],
                       {

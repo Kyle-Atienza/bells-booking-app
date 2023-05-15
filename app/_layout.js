@@ -1,17 +1,13 @@
 import { Stack, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Drawer } from "expo-router/drawer";
-import {
-  MD3LightTheme,
-  Provider as PaperProvider,
-  Provider,
-  Text,
-} from "react-native-paper";
+import { MD3LightTheme, Provider as PaperProvider } from "react-native-paper";
 import { UtilitiesContext } from "../contexts";
 
 import { DrawerContent } from "../components/drawer";
 import { useAuth } from "../hooks";
 import { getConfigurations } from "../services/configuration";
+import { Settings } from "luxon";
 
 const theme = {
   ...MD3LightTheme,
@@ -26,6 +22,8 @@ const theme = {
 };
 
 const Layout = () => {
+  Settings.defaultZone = "Asia/Manila";
+
   const router = useRouter();
 
   const { loggedIn } = useAuth();
@@ -65,6 +63,13 @@ const Layout = () => {
     setRefresh(false);
   }, [refresh]);
 
+  const onRefresh = useCallback(() => {
+    setRefresh(true);
+    setTimeout(() => {
+      setRefresh(false);
+    }, 2000);
+  }, []);
+
   return (
     <UtilitiesContext.Provider
       value={{
@@ -74,6 +79,7 @@ const Layout = () => {
         setConfigurations,
         isLoading,
         setIsLoading,
+        onRefresh,
       }}
     >
       <PaperProvider theme={theme}>

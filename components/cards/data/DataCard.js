@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View } from "react-native";
 import { Text, useTheme, Button } from "react-native-paper";
+import { SIZES } from "../../../constants";
 
 export const DataCard = ({ variant = "primary", value, label }) => {
   const theme = useTheme();
@@ -30,9 +31,9 @@ export const DataCard = ({ variant = "primary", value, label }) => {
     <View
       style={{
         flexGrow: 1,
-        padding: 20,
+        padding: SIZES.large,
         backgroundColor: theme.colors.primaryContainer,
-        borderRadius: 10,
+        borderRadius: SIZES.xSmall,
         alignItems: "center",
       }}
     >

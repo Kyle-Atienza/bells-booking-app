@@ -229,7 +229,6 @@ export const InquiryInformation = ({
                 onDismiss={() => setShowScheduleDropdown(false)}
                 value={formData.schedule}
                 setValue={(text) => {
-                  console.log("new", newInquiry);
                   if (newInquiry) {
                     setFormData((prevState) => ({
                       ...prevState,

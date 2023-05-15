@@ -32,6 +32,11 @@ const Login = () => {
       password: formData.password,
     })
       .then((res) => {
+        setFormData({
+          usernameEmail: "",
+          password: "",
+        });
+
         const toStore = [
           ["@accessToken", res.data.data.access_token],
           ["@userType", res.data.data.me.type],

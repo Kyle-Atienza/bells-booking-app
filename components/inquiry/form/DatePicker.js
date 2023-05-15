@@ -97,6 +97,9 @@ export const DatePicker = ({
                           },
                           style: "default",
                         },
+                        {
+                          text: "Cancel",
+                        },
                       ],
                       {
                         cancelable: true,

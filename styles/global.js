@@ -21,6 +21,7 @@ export const globalStyles = StyleSheet.create({
       alignSelf: "center",
       paddingHorizontal: 20,
       paddingVertical: 5,
+      width: "100%",
     }),
   },
 

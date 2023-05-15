@@ -33,19 +33,6 @@ const Settings = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({});
-  const [newUserData, setNewUserData] = useState({
-    name: null,
-    email: null,
-    password: null,
-  });
-
-  const parseConfigName = (name) => {
-    const lowercase = name.toLowerCase().replaceAll("_", " ");
-    const capitalized =
-      lowercase.slice(0, 1).toUpperCase() + lowercase.slice(1);
-
-    return capitalized;
-  };
 
   const onSubmit = () => {
     Alert.alert(
@@ -67,58 +54,41 @@ const Settings = () => {
                 });
                 setIsLoading(false);
 
-                Alert.alert("Success", "Price successfully updated", [], {
-                  cancelable: true,
-                });
+                Alert.alert(
+                  "Success",
+                  "Price successfully updated",
+                  [
+                    {
+                      text: "OK",
+                    },
+                  ],
+                  {
+                    cancelable: true,
+                  }
+                );
               })
               .catch((e) => {
                 console.log(e);
                 setIsLoading(false);
 
-                Alert.alert("Failed", "Price update failed", [], {
-                  cancelable: true,
-                });
+                Alert.alert(
+                  "Failed",
+                  "Price update failed",
+                  [
+                    {
+                      text: "OK",
+                    },
+                  ],
+                  {
+                    cancelable: true,
+                  }
+                );
               });
           },
           style: "default",
         },
-      ],
-      {
-        cancelable: true,
-      }
-    );
-  };
-
-  const onCreateUser = () => {
-    Alert.alert(
-      "Create New User",
-      `Are you sure you want to create ${newUserData.name} an account?`,
-      [
         {
-          text: "OK",
-          onPress: () => {
-            setIsLoading(true);
-            createUser(newUserData)
-              .then((res) => {
-                setNewUserData({
-                  name: null,
-                  email: null,
-                  password: null,
-                });
-                Alert.alert(
-                  "User Created",
-                  `Successfully created account`,
-                  [],
-                  { cancelable: true }
-                );
-                setIsLoading(false);
-              })
-              .catch((e) => {
-                console.log(e);
-                setIsLoading(false);
-              });
-          },
-          style: "default",
+          text: "Cancel",
         },
       ],
       {
@@ -155,84 +125,26 @@ const Settings = () => {
         <View style={globalStyles.main}>
           {isLoading ? <LoadingScreen /> : null}
           <View style={globalStyles.container}>
-            <Text variant="titleLarge">Create User</Text>
-            <View
+            <Text variant="titleLarge">Users</Text>
+            <TouchableOpacity
               style={{
-                marginTop: SIZES.xSmall,
+                paddingVertical: SIZES.small,
+                borderBottomWidth: 1,
+                borderBottomColor: "#D9D9D9",
               }}
+              onPress={() => router.push("/settings/users")}
             >
-              <Text variant="titleSmall">New User Name</Text>
-              <View style={{ flexDirection: "row", gap: SIZES.large }}>
-                <TextInput
-                  placeholder="Enter Name"
-                  value={newUserData.name || ""}
-                  onChangeText={(text) =>
-                    setNewUserData((prevState) => ({
-                      ...prevState,
-                      name: text,
-                    }))
-                  }
-                  style={{ backgroundColor: "#fff", flex: 1 }}
-                  mode="outlined"
-                  dense
-                />
+              <View>
+                <Text>Accounts</Text>
               </View>
-            </View>
-            <View
-              style={{
-                marginTop: SIZES.xSmall,
-              }}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{ paddingVertical: SIZES.small }}
+              onPress={() => router.push("/settings/user/new")}
             >
-              <Text variant="titleSmall">New User Email</Text>
-              <View style={{ flexDirection: "row", gap: SIZES.large }}>
-                <TextInput
-                  placeholder="Enter Email"
-                  value={newUserData.email || ""}
-                  onChangeText={(text) =>
-                    setNewUserData((prevState) => ({
-                      ...prevState,
-                      email: text,
-                    }))
-                  }
-                  style={{ backgroundColor: "#fff", flex: 1 }}
-                  mode="outlined"
-                  dense
-                  autoCapitalize="none"
-                />
+              <View>
+                <Text>Create</Text>
               </View>
-            </View>
-            <View
-              style={{
-                marginTop: SIZES.xSmall,
-              }}
-            >
-              <Text variant="titleSmall">New User Password</Text>
-              <View style={{ flexDirection: "row", gap: SIZES.large }}>
-                <TextInput
-                  placeholder="Enter Password"
-                  value={newUserData.password || ""}
-                  onChangeText={(text) =>
-                    setNewUserData((prevState) => ({
-                      ...prevState,
-                      password: text,
-                    }))
-                  }
-                  style={{ backgroundColor: "#fff", flex: 1 }}
-                  mode="outlined"
-                  dense
-                  autoCapitalize="none"
-                  secureTextEntry={true}
-                />
-              </View>
-            </View>
-          </View>
-          <View style={globalStyles.container}>
-            <TouchableOpacity onPress={() => onCreateUser()}>
-              <Button style={globalStyles.button.primary(theme.colors.primary)}>
-                <Text variant="labelLarge" style={{ color: "#fff" }}>
-                  Create User
-                </Text>
-              </Button>
             </TouchableOpacity>
           </View>
           <View style={globalStyles.container}>
