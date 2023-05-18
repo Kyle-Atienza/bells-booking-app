@@ -27,8 +27,6 @@ const Dashboard = () => {
   const [stats, setStats] = useState({});
 
   useEffect(() => {
-    console.log("stats");
-
     getStats()
       .then((res) => {
         setStats(res.data.data);

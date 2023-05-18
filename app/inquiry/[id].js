@@ -32,6 +32,7 @@ import {
   mapDataFromDb,
   mapDataToDb,
   compute,
+  inquiryStatus,
 } from "../../helpers/inqiuryHelper";
 import { LoadingScreen } from "../../components/common";
 import { DateTime } from "luxon";
@@ -330,7 +331,11 @@ const Inquire = () => {
                 >
                   <Button>
                     <Text style={{ fontSize: 12, color: "#fff" }}>
-                      Cancel Inquiry
+                      Cancel{" "}
+                      {inquiryStatus({ ...formData, ...amountData }) ===
+                      "Confirmed"
+                        ? "Schedule"
+                        : "Inquiry"}
                     </Text>
                   </Button>
                 </TouchableOpacity>

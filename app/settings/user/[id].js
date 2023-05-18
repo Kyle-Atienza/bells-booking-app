@@ -46,6 +46,12 @@ const User = () => {
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [passwordForm, setPasswordForm] = useState({
+    new: "",
+    confirm: "",
+  });
 
   useEffect(() => {
     setIsLoading(true);
@@ -132,7 +138,7 @@ const User = () => {
     }
   };
 
-  const onUpdateUser = () => {
+  const onUpdateUser = (data) => {
     if (!formData.name || !formData.email) {
       Alert.alert("Error", "Please provide all values", [
         {
@@ -150,10 +156,7 @@ const User = () => {
               setIsLoading(true);
               updateUser({
                 id: userId,
-                data: {
-                  name: formData.name,
-                  email: formData.email,
-                },
+                data: data,
               })
                 .then((res) => {
                   setIsLoading(false);
@@ -161,6 +164,10 @@ const User = () => {
                     name: res.data.data.name,
                     email: res.data.data.email,
                     password: "",
+                  });
+                  setPasswordForm({
+                    new: "",
+                    confirm: "",
                   });
                   Alert.alert(
                     "Updated User",
@@ -379,7 +386,12 @@ const User = () => {
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={{ flex: 1 }}
-                  onPress={() => onUpdateUser()}
+                  onPress={() =>
+                    onUpdateUser({
+                      name: formData.name,
+                      email: formData.email,
+                    })
+                  }
                 >
                   <Button
                     style={{
@@ -394,6 +406,142 @@ const User = () => {
               </>
             )}
           </View>
+          {userId !== "new" ? (
+            <>
+              <View style={globalStyles.container}>
+                <View
+                  style={{
+                    marginTop: SIZES.xSmall,
+                  }}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <Text variant="titleSmall">New Password</Text>
+                    <View
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                    >
+                      <Checkbox
+                        status={showPassword ? "checked" : "unchecked"}
+                        onPress={() => setShowPassword(!showPassword)}
+                      />
+                      <Text variant="titleSmall">Show Password</Text>
+                    </View>
+                  </View>
+                  <View style={{ flexDirection: "row", gap: SIZES.large }}>
+                    <TextInput
+                      placeholder="Enter New Password"
+                      value={passwordForm.new}
+                      onChangeText={(text) =>
+                        setPasswordForm((prevState) => ({
+                          ...prevState,
+                          new: text,
+                        }))
+                      }
+                      style={{ backgroundColor: "#fff", flex: 1 }}
+                      mode="outlined"
+                      dense
+                      autoCapitalize="none"
+                      secureTextEntry={!showPassword}
+                    />
+                  </View>
+                </View>
+                <View
+                  style={{
+                    marginTop: SIZES.xSmall,
+                  }}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <Text variant="titleSmall">Confirm New Password</Text>
+                    <View
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                    >
+                      <Checkbox
+                        status={showConfirmPassword ? "checked" : "unchecked"}
+                        onPress={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
+                      />
+                      <Text variant="titleSmall">Show Password</Text>
+                    </View>
+                  </View>
+                  <View style={{ flexDirection: "row", gap: SIZES.large }}>
+                    <TextInput
+                      placeholder="Confirm New Password"
+                      value={passwordForm.confirm}
+                      onChangeText={(text) =>
+                        setPasswordForm((prevState) => ({
+                          ...prevState,
+                          confirm: text,
+                        }))
+                      }
+                      style={{ backgroundColor: "#fff", flex: 1 }}
+                      mode="outlined"
+                      dense
+                      autoCapitalize="none"
+                      secureTextEntry={!showConfirmPassword}
+                    />
+                  </View>
+                </View>
+              </View>
+              <View style={globalStyles.container}>
+                <TouchableOpacity
+                  style={{ flex: 1 }}
+                  onPress={() => {
+                    if (!passwordForm.new || !passwordForm.confirm) {
+                      Alert.alert(
+                        "Empty Password",
+                        "Please make sure that both password are filled up",
+                        [
+                          {
+                            text: "OK",
+                          },
+                        ],
+                        { cancelable: true }
+                      );
+                    } else {
+                      if (passwordForm.new === passwordForm.confirm) {
+                        onUpdateUser({
+                          password: passwordForm.new,
+                        });
+                      } else {
+                        Alert.alert(
+                          "Password did not match",
+                          "Please make sure that both passwords match",
+                          [
+                            {
+                              text: "OK",
+                            },
+                          ],
+                          { cancelable: true }
+                        );
+                      }
+                    }
+                  }}
+                >
+                  <Button
+                    style={{
+                      ...globalStyles.button.primary(theme.colors.primary),
+                    }}
+                  >
+                    <Text variant="labelLarge" style={{ color: "#fff" }}>
+                      Update Password
+                    </Text>
+                  </Button>
+                </TouchableOpacity>
+              </View>
+            </>
+          ) : null}
         </View>
       </ScrollView>
     </SafeAreaView>

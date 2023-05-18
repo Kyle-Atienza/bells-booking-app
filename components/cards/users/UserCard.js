@@ -18,12 +18,40 @@ export const UserCard = ({ user }) => {
           borderRadius: SIZES.xSmall,
         }}
       >
-        <Text
-          variant="headlineSmall"
-          style={{ color: theme.colors.primary, fontWeight: 700 }}
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
         >
-          {user.name}
-        </Text>
+          <Text
+            variant="headlineSmall"
+            style={{ color: theme.colors.primary, fontWeight: 700 }}
+          >
+            {user.name}
+          </Text>
+          {user.type === "admin" ? (
+            <View
+              style={{
+                backgroundColor: theme.colors.primary,
+                paddingHorizontal: 10,
+                paddingVertical: 5,
+                borderRadius: 100,
+              }}
+            >
+              <Text
+                variant="labelMedium"
+                style={{
+                  color: theme.colors.primaryContainer,
+                  fontWeight: 700,
+                }}
+              >
+                Admin
+              </Text>
+            </View>
+          ) : null}
+        </View>
         <Text variant="bodyLarge" style={{ color: theme.colors.primary }}>
           {user.email}
         </Text>

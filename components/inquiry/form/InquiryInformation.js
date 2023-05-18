@@ -29,10 +29,18 @@ export const InquiryInformation = ({
 }) => {
   const theme = useTheme();
 
-  const { setIsLoading } = useContext(UtilitiesContext);
+  const { setIsLoading, refresh } = useContext(UtilitiesContext);
 
   const [eventPicker, setEventPicker] = useState(false);
   const [showScheduleDropdown, setShowScheduleDropdown] = useState(false);
+  const [dropdown, setDropdown] = useState(false);
+
+  useEffect(() => {
+    setDropdown(false);
+    setTimeout(() => {
+      setDropdown(true);
+    }, 100);
+  }, [refresh]);
 
   const dateInput = () => {
     if (inquiryType) {
@@ -218,7 +226,7 @@ export const InquiryInformation = ({
           {dateInput()}
         </View>
         <View style={{ marginTop: SIZES.large }}>
-          {inquiryType === "event" ? (
+          {inquiryType === "event" && dropdown ? (
             <>
               <Text variant="titleSmall">Schedule {required()}</Text>
               <DropDown
