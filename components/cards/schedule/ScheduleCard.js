@@ -32,7 +32,6 @@ export const ScheduleCard = ({ data }) => {
         >
           <Chip
             style={{
-              height: 30,
               borderRadius: 100,
               backgroundColor: theme.colors.tertiaryContainer,
             }}
@@ -44,7 +43,6 @@ export const ScheduleCard = ({ data }) => {
           <Text>-</Text>
           <Chip
             style={{
-              height: 30,
               borderRadius: 100,
               backgroundColor: theme.colors.tertiaryContainer,
             }}
@@ -60,7 +58,6 @@ export const ScheduleCard = ({ data }) => {
         <>
           <Chip
             style={{
-              height: 30,
               borderRadius: 100,
               backgroundColor: theme.colors.tertiaryContainer,
             }}
@@ -71,7 +68,6 @@ export const ScheduleCard = ({ data }) => {
           </Chip>
           <Chip
             style={{
-              height: 30,
               borderRadius: 100,
               backgroundColor: theme.colors.tertiaryContainer,
             }}

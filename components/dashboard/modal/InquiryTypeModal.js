@@ -39,7 +39,7 @@ export const InquiryTypeModal = ({ visible, hideModal }) => {
                 hideModal();
               }}
             >
-              <Chip style={{ height: 30, borderRadius: 100 }}>
+              <Chip style={{ borderRadius: 100 }}>
                 <Text variant="titleSmall">Apartment</Text>
               </Chip>
             </TouchableOpacity>
@@ -50,7 +50,7 @@ export const InquiryTypeModal = ({ visible, hideModal }) => {
                 hideModal();
               }}
             >
-              <Chip style={{ height: 30, borderRadius: 100 }}>
+              <Chip style={{ borderRadius: 100 }}>
                 <Text variant="titleSmall">Event</Text>
               </Chip>
             </TouchableOpacity>
