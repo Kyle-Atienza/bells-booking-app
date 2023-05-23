@@ -1,17 +1,4 @@
-import { REACT_APP_BASE_URL, REACT_APP_BEARER_TOKEN } from "@env";
-
-export const config = (token) => {
-  return {
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    data: {},
-  };
-};
-
-export const params = (page, limit, sort) => {
+const params = (page, limit, sort) => {
   const defaults = {
     page: 1,
     limit: 20,
@@ -26,3 +13,5 @@ export const params = (page, limit, sort) => {
 
   return paramsString.join("&");
 };
+
+export { params };

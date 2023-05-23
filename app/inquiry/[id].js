@@ -4,34 +4,59 @@ import {
   View,
   SafeAreaView,
   ScrollView,
+  Alert,
+  BackHandler,
   TouchableOpacity,
-  ActivityIndicator,
 } from "react-native";
-import { useTheme, Text, Button } from "react-native-paper";
+import { useTheme, Text, IconButton, Button } from "react-native-paper";
 import { globalStyles } from "../../styles";
-import { APARTMENT_PRICE, SIZES } from "../../constants";
 
-import { InquiryInformation, InquiryAmount } from "../../components/inquiry";
+import {
+  InquiryInformation,
+  InquiryAmount,
+  InquiryButton,
+} from "../../components/inquiry";
 
-import { createInquiry, getInquiries, payInquiry } from "../../services";
+import {
+  createInquiry,
+  getInquiries,
+  payInquiry,
+  updateInquiry,
+} from "../../services";
 
 import { useInquiry } from "../../hooks";
 import { UtilitiesContext } from "../../contexts";
 import { capitalize } from "../../helpers/typeHelper";
+import {
+  validateForm,
+  mapDataFromDb,
+  mapDataToDb,
+  compute,
+  inquiryStatus,
+} from "../../helpers/inqiuryHelper";
+import { LoadingScreen } from "../../components/common";
+import { DateTime } from "luxon";
+import { SIZES } from "../../constants";
 
 const Inquire = () => {
   const theme = useTheme();
-  const route = useRouter();
+  const router = useRouter();
 
   const { id: inquiryId } = useSearchParams();
 
-  const { refresh, setRefresh } = useContext(UtilitiesContext);
+  const { refresh, setRefresh, configurations, isLoading, setIsLoading } =
+    useContext(UtilitiesContext);
+
+  const { resetData } = useInquiry();
 
   const [inquiryType, setInquiryType] = useState(undefined);
   const [newInquiry, setNewInquiry] = useState(undefined);
-  const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = React.useState({
+  const [pendingInquiry, setPendingInquiry] = useState(undefined);
+  const [hasDownpayment, setHasDownpayment] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
     name: null,
+    number: null,
     range: { startDate: null, endDate: null },
     date: null,
     schedule: null,
@@ -41,19 +66,15 @@ const Inquire = () => {
     downpayment: null,
     downpaymentDue: null,
     payment: null,
+    withCatering: null,
+    eventType: null,
   });
   const [amountData, setAmountData] = useState({
     subTotal: null,
     totalAmountDue: null,
     balance: null,
   });
-
-  const {
-    validateForm,
-    mapDataFromDb,
-    mapDataToDb,
-    isLoading: isInquiryLoading,
-  } = useInquiry();
+  const [priceData, setPriceData] = useState({});
 
   const onSubmit = () => {
     if (!validateForm(inquiryType, { formData, amountData })) {
@@ -62,59 +83,144 @@ const Inquire = () => {
     }
 
     setIsLoading(true);
-    createInquiry(mapDataToDb(inquiryType, { formData, amountData }))
+    createInquiry(mapDataToDb(inquiryType, { formData, amountData, priceData }))
       .then((res) => {
         setIsLoading(false);
-        setRefresh(true);
-        route.push("/");
+
+        Alert.alert("Inquiry Created", "Inquiry successfully created", [
+          {
+            text: "OK",
+            onPress: () => {
+              setFormData({
+                name: null,
+                range: { startDate: null, endDate: null },
+                date: null,
+                schedule: null,
+                estPax: null,
+                apartmentCount: null,
+                discount: null,
+                downpayment: null,
+                downpaymentDue: null,
+                payment: null,
+                withCatering: null,
+                eventType: null,
+              });
+              setAmountData({
+                subTotal: null,
+                totalAmountDue: null,
+                balance: null,
+              });
+              setPriceData({});
+              router.push("/");
+              setRefresh(true);
+            },
+            style: "default",
+          },
+        ]);
       })
       .catch((e) => {
-        setIsLoading(false);
         console.log(e);
+        setIsLoading(false);
+        if (e.response.status === 409) {
+          alert(e.response.data.message);
+        }
       });
   };
 
-  const onPayment = () => {
-    if (formData.payment || (inquiryType === "event" && !formData.payment)) {
+  const onPayment = (type, amount) => {
+    if (parseFloat(amount)) {
       setIsLoading(true);
       payInquiry({
         id: inquiryId,
         data: {
-          type: "payment",
-          amount:
-            inquiryType === "apartment" ? formData.payment : amountData.balance,
+          type: type,
+          amount: parseFloat(amount),
         },
       })
         .then((res) => {
-          console.log(res);
           setIsLoading(false);
-          setRefresh(true);
+          Alert.alert(
+            "Transaction Successful",
+            `${type.slice(0, 1).toUpperCase() + type.slice(1)} Successful`,
+            [
+              {
+                text: "OK",
+                onPress: () => {
+                  setRefresh(true);
+                },
+                style: "default",
+              },
+            ]
+          );
         })
         .catch((e) => {
-          console.log(e);
           setIsLoading(false);
         });
     } else {
-      alert("Please add amount of payment");
+      if (type === "downpayment") {
+        Alert.alert(
+          "Empty Value",
+          "Please add Downpayment amount",
+          [
+            {
+              text: "OK",
+            },
+          ],
+          {
+            cancelable: true,
+          }
+        );
+      } else if (type === "payment") {
+        Alert.alert(
+          "Empty Value",
+          "Please add Payment amount",
+          [
+            {
+              text: "OK",
+            },
+          ],
+          {
+            cancelable: true,
+          }
+        );
+      }
     }
   };
 
   useEffect(() => {
-    setAmountData({
-      subTotal: formData.apartmentCount * APARTMENT_PRICE,
-      totalAmountDue:
-        formData.apartmentCount * APARTMENT_PRICE - formData.discount,
-      balance:
-        formData.apartmentCount * APARTMENT_PRICE -
-        formData.discount -
-        formData.downpayment,
-    });
-  }, [formData.apartmentCount, formData.discount, formData.downpayment]);
+    setAmountData(
+      compute(newInquiry, inquiryType, priceData, formData, amountData)
+    );
+  }, [formData, refresh, priceData]);
 
   useEffect(() => {
     if (inquiryId === "apartment" || inquiryId === "event") {
+      setFormData({
+        name: null,
+        number: null,
+        range: { startDate: null, endDate: null },
+        date: null,
+        schedule: null,
+        estPax: null,
+        apartmentCount: null,
+        discount: null,
+        downpayment: null,
+        downpaymentDue: null,
+        payment: null,
+        withCatering: null,
+        eventType: null,
+      });
+      setAmountData({
+        subTotal: null,
+        totalAmountDue: null,
+        balance: null,
+      });
+      setPriceData({});
+
       setInquiryType(inquiryId);
       setNewInquiry(true);
+      setPriceData(configurations);
+      setRefresh(false);
     } else {
       setNewInquiry(false);
 
@@ -128,6 +234,12 @@ const Inquire = () => {
             ...prevState,
             balance: mappedResponse.balance,
           }));
+          setPriceData(mappedResponse.prices);
+          setHasDownpayment(!!mappedResponse.formData.downpayment);
+          setPendingInquiry(
+            !mappedResponse.formData.downpaymentDue &&
+              !mappedResponse.formData.downpayment
+          );
         })
         .catch((e) => {
           console.log(e);
@@ -142,8 +254,15 @@ const Inquire = () => {
   }, [refresh]);
 
   useEffect(() => {
-    setIsLoading(isInquiryLoading);
-  }, [isInquiryLoading]);
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        setRefresh(true);
+      }
+    );
+
+    return () => backHandler.remove();
+  }, []);
 
   return (
     <SafeAreaView>
@@ -163,30 +282,70 @@ const Inquire = () => {
               </Text>
             );
           },
+          headerRight: () => {
+            if (!newInquiry) {
+              return (
+                <TouchableOpacity
+                  style={{
+                    flexDirection: "row",
+                    backgroundColor: "#B00020",
+                    borderRadius: 10,
+                    marginRight: SIZES.large,
+                  }}
+                  onPress={() => {
+                    Alert.alert(
+                      "Cancel Inquiry",
+                      "Are you sure you want to cancel this inquiry?",
+                      [
+                        {
+                          text: "OK",
+                          onPress: () => {
+                            setIsLoading(true);
+                            updateInquiry({
+                              id: inquiryId,
+                              data: {
+                                status: "cancelled",
+                              },
+                            })
+                              .then((res) => {
+                                router.push(-1);
+                                setIsLoading(false);
+                                setRefresh(true);
+                              })
+                              .catch((e) => {
+                                console.log(e);
+                                setIsLoading(false);
+                              });
+                          },
+                          style: "default",
+                        },
+                        {
+                          text: "Cancel",
+                        },
+                      ],
+                      {
+                        cancelable: true,
+                      }
+                    );
+                  }}
+                >
+                  <Button>
+                    <Text style={{ fontSize: 12, color: "#fff" }}>
+                      Cancel{" "}
+                      {inquiryStatus({ ...formData, ...amountData }) ===
+                      "Confirmed"
+                        ? "Schedule"
+                        : "Inquiry"}
+                    </Text>
+                  </Button>
+                </TouchableOpacity>
+              );
+            }
+          },
         }}
       />
-      {isLoading ? (
-        <View
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "#97979769",
-            zIndex: 2,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <ActivityIndicator
-            style={{ marginTop: SIZES.large }}
-            animating={isLoading}
-            color={theme.colors.primary}
-            size="large"
-          />
-        </View>
-      ) : null}
+
+      {isLoading ? <LoadingScreen /> : null}
       <ScrollView>
         <View style={globalStyles.main}>
           <InquiryInformation
@@ -194,6 +353,7 @@ const Inquire = () => {
             formData={formData}
             setFormData={setFormData}
             newInquiry={newInquiry}
+            inquiryId={inquiryId}
           />
           <InquiryAmount
             formData={formData}
@@ -201,36 +361,21 @@ const Inquire = () => {
             amountData={amountData}
             newInquiry={newInquiry}
             inquiryType={inquiryType}
+            hasDownpayment={hasDownpayment}
           />
-          {parseFloat(amountData.balance) !== 0 ? (
-            <View style={globalStyles.container}>
-              {newInquiry ? (
-                <TouchableOpacity onPress={() => onSubmit()}>
-                  <Button
-                    style={globalStyles.button.primary(theme.colors.secondary)}
-                  >
-                    <Text variant="labelLarge" style={{ color: "#fff" }}>
-                      Add Inquiry
-                    </Text>
-                  </Button>
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity onPress={() => onPayment()}>
-                  <Button
-                    style={globalStyles.button.primary(theme.colors.primary)}
-                  >
-                    <Text variant="labelLarge" style={{ color: "#fff" }}>
-                      {inquiryType === "apartment" || amountData.balance !== 0
-                        ? !formData.downpayment
-                          ? "Pay Downpayment"
-                          : "Pay Inquiry"
-                        : "Mark as fully paid"}
-                    </Text>
-                  </Button>
-                </TouchableOpacity>
-              )}
-            </View>
-          ) : null}
+          <InquiryButton
+            inquiryId={inquiryId}
+            formData={formData}
+            amountData={amountData}
+            hasDownpayment={hasDownpayment}
+            newInquiry={newInquiry}
+            pendingInquiry={pendingInquiry}
+            onPayment={(type, amount) => onPayment(type, amount)}
+            onSubmit={onSubmit}
+            inquiryType={inquiryType}
+            setRefresh={() => setRefresh(true)}
+            setIsLoading={setIsLoading}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>

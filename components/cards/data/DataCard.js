@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View } from "react-native";
 import { Text, useTheme, Button } from "react-native-paper";
-import PropTypes from "prop-types";
+import { SIZES } from "../../../constants";
 
 export const DataCard = ({ variant = "primary", value, label }) => {
   const theme = useTheme();
@@ -31,9 +31,9 @@ export const DataCard = ({ variant = "primary", value, label }) => {
     <View
       style={{
         flexGrow: 1,
-        padding: 20,
+        padding: SIZES.large,
         backgroundColor: theme.colors.primaryContainer,
-        borderRadius: 10,
+        borderRadius: SIZES.xSmall,
         alignItems: "center",
       }}
     >
@@ -46,8 +46,4 @@ export const DataCard = ({ variant = "primary", value, label }) => {
       <Text variant="labelLarge">{label || "Label"}</Text>
     </View>
   );
-};
-
-DataCard.propTypes = {
-  variant: "primary",
 };

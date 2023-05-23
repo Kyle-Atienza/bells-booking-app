@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useState } from "react";
-import { FlatList, TouchableOpacity, View } from "react-native";
+import React, { useCallback, useContext, useEffect, useState } from "react";
+import { FlatList, RefreshControl, TouchableOpacity, View } from "react-native";
 import {
   ActivityIndicator,
   IconButton,
@@ -13,8 +13,9 @@ import { SIZES } from "../../../constants";
 import { useRouter } from "expo-router";
 import { getInquiries } from "../../../services";
 import { UtilitiesContext } from "../../../contexts";
+import { DateTime } from "luxon";
 
-export const Inquiries = ({ header }) => {
+export const Inquiries = ({ header, filteredByDate, hide, limit }) => {
   const theme = useTheme();
   const router = useRouter();
 
@@ -24,13 +25,35 @@ export const Inquiries = ({ header }) => {
   const [searchResults, setSearchResults] = useState([]);
 
   const [isLoading, setisLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [data, setData] = useState([]);
 
   const fetchData = () => {
     setisLoading(true);
     getInquiries()
       .then((res) => {
-        setData(res.data.data.rows);
+        const innerData = res.data.data.rows;
+
+        if (filteredByDate) {
+          const filteredDateDateIds = filteredByDate?.schedules[
+            filteredByDate.selectedDate
+          ]?.periods.map((period) => {
+            return period.id;
+          });
+          setData(
+            filteredDateDateIds?.reduce((dayData, scheduleId) => {
+              dayData.push(
+                innerData.find((item) => {
+                  return item.id == scheduleId;
+                })
+              );
+              return dayData;
+            }, []) || []
+          );
+        } else {
+          setData(innerData);
+        }
+
         setisLoading(false);
       })
       .catch((e) => {
@@ -45,8 +68,33 @@ export const Inquiries = ({ header }) => {
 
   useEffect(() => {
     setSearchResults(
-      data.filter((item) =>
-        item.name.toLowerCase().includes(search.toLowerCase())
+      data?.filter(
+        (item) =>
+          item.name.toLowerCase().includes(search.toLowerCase()) ||
+          DateTime.fromISO(item.apt_date_to)
+            .toFormat("LLLL dd yyyy")
+            .toLowerCase()
+            .includes(search.toLowerCase()) ||
+          DateTime.fromISO(item.apt_date_from)
+            .toFormat("LLLL dd yyyy")
+            .toLowerCase()
+            .includes(search.toLowerCase()) ||
+          DateTime.fromISO(item.apt_date_to)
+            .toFormat("LLL dd yyyy")
+            .toLowerCase()
+            .includes(search.toLowerCase()) ||
+          DateTime.fromISO(item.apt_date_from)
+            .toFormat("LLL dd yyyy")
+            .toLowerCase()
+            .includes(search.toLowerCase()) ||
+          DateTime.fromISO(item.event_date)
+            .toFormat("LLLL dd yyyy")
+            .toLowerCase()
+            .includes(search.toLowerCase()) ||
+          DateTime.fromISO(item.event_date)
+            .toFormat("LLL dd yyyy")
+            .toLowerCase()
+            .includes(search.toLowerCase())
       )
     );
   }, [search]);
@@ -57,6 +105,26 @@ export const Inquiries = ({ header }) => {
     }
     setRefresh(false);
   }, [refresh]);
+
+  const visibleData = () => {
+    if (!search) {
+      if (!limit) {
+        return data;
+      }
+
+      return hide
+        ? data.slice(0, limit).filter((item) => !hide(item))
+        : data.slice(0, limit);
+    }
+    return hide ? searchResults.filter((item) => hide(item)) : searchResults;
+  };
+
+  const onRefresh = useCallback(() => {
+    setRefresh(true);
+    setTimeout(() => {
+      setRefresh(false);
+    }, 2000);
+  }, []);
 
   const headerComponent = () => {
     return (
@@ -70,29 +138,49 @@ export const Inquiries = ({ header }) => {
             marginTop: 10,
           }}
         >
-          <TextInput
-            label="Enter name, inspection"
-            value={search}
-            onChangeText={(text) => setSearch(text)}
-            style={{ backgroundColor: "#fff", flex: 1 }}
-            mode="outlined"
-            dense
-          />
-          <TouchableOpacity
-            style={{
-              backgroundColor: theme.colors.primaryContainer,
-              borderRadius: SIZES.medium,
-            }}
-            onPress={fetchData}
-          >
-            <IconButton
-              icon="refresh"
-              iconColor={theme.colors.primary}
-              size={20}
+          <>
+            <TextInput
+              label="Enter name or date"
+              value={search}
+              onChangeText={(text) => setSearch(text)}
+              style={{ backgroundColor: "#fff", flex: 1 }}
+              mode="outlined"
+              dense
             />
-          </TouchableOpacity>
+            {/* <TouchableOpacity
+              style={{
+                backgroundColor: theme.colors.primaryContainer,
+                borderRadius: SIZES.medium,
+              }}
+              onPress={fetchData}
+            >
+              <IconButton
+                icon="refresh"
+                iconColor={theme.colors.primary}
+                size={20}
+              />
+            </TouchableOpacity> */}
+          </>
         </View>
       </>
+    );
+  };
+
+  const renderItem = (item) => {
+    return isLoading ? (
+      <ActivityIndicator
+        style={{ marginTop: SIZES.large }}
+        animating={true}
+        color={theme.colors.primary}
+      />
+    ) : !data.length ? (
+      <Text style={{ textAlign: "center" }}>
+        You don't have any inquiries {filteredByDate ? "today" : ""}
+      </Text>
+    ) : !item ? null : (
+      <TouchableOpacity onPress={() => router.push(`/inquiry/${item.id}`)}>
+        <ScheduleCard data={item} />
+      </TouchableOpacity>
     );
   };
 
@@ -115,28 +203,19 @@ export const Inquiries = ({ header }) => {
       <View>
         <FlatList
           showsVerticalScrollIndicator={false}
-          data={isLoading ? [{}] : searchResults.length ? searchResults : data}
+          data={!isLoading && data.length ? visibleData() : [{}]}
           renderItem={({ item }) => {
-            return isLoading ? (
-              <ActivityIndicator
-                style={{ marginTop: SIZES.large }}
-                animating={true}
-                color={theme.colors.primary}
-              />
-            ) : (
-              <TouchableOpacity
-                onPress={() => router.push(`/inquiry/${item.id}`)}
-              >
-                <ScheduleCard data={item} />
-              </TouchableOpacity>
-            );
+            return renderItem(item);
           }}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item?.id || "temp"}
           contentContainerStyle={{
             rowGap: SIZES.large,
             paddingBottom: 50,
           }}
           ListHeaderComponent={headerComponent()}
+          refreshControl={
+            <RefreshControl refreshing={refresh} onRefresh={onRefresh} />
+          }
         />
       </View>
     </View>

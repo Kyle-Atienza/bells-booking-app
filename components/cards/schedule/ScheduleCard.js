@@ -6,6 +6,7 @@ import { capitalize } from "../../../helpers/typeHelper";
 import { DateTime } from "luxon";
 import { formatTime } from "../../../helpers/timeHelper";
 import { SIZES } from "../../../constants";
+import { inquiryStatus } from "../../../helpers/inqiuryHelper";
 
 export const ScheduleCard = ({ data }) => {
   const theme = useTheme();
@@ -15,12 +16,6 @@ export const ScheduleCard = ({ data }) => {
   useEffect(() => {
     setisPaid(parseFloat(data.balance) === 0);
   }, [data]);
-
-  const cardStatus = () => {
-    if (parseFloat(data.downpayment) === 0) return "Pending | ";
-    if (isPaid) return "Paid | ";
-    return "Reserved | ";
-  };
 
   const cardChips = () => {
     const type = data.type;
@@ -37,7 +32,6 @@ export const ScheduleCard = ({ data }) => {
         >
           <Chip
             style={{
-              height: 30,
               borderRadius: 100,
               backgroundColor: theme.colors.tertiaryContainer,
             }}
@@ -49,7 +43,6 @@ export const ScheduleCard = ({ data }) => {
           <Text>-</Text>
           <Chip
             style={{
-              height: 30,
               borderRadius: 100,
               backgroundColor: theme.colors.tertiaryContainer,
             }}
@@ -65,7 +58,6 @@ export const ScheduleCard = ({ data }) => {
         <>
           <Chip
             style={{
-              height: 30,
               borderRadius: 100,
               backgroundColor: theme.colors.tertiaryContainer,
             }}
@@ -76,7 +68,6 @@ export const ScheduleCard = ({ data }) => {
           </Chip>
           <Chip
             style={{
-              height: 30,
               borderRadius: 100,
               backgroundColor: theme.colors.tertiaryContainer,
             }}
@@ -110,7 +101,8 @@ export const ScheduleCard = ({ data }) => {
         </View>
         <Text variant="titleSmall">
           <>
-            {cardStatus()}
+            {inquiryStatus(data)}
+            {" | "}
             {capitalize(data.type)}
           </>
         </Text>
